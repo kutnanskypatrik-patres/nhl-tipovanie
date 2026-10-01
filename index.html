@@ -1,27 +1,210 @@
-<!doctype html>
-<html lang="sk"><head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#0b1220"><title>NHL Tipovanie</title>
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NHL Tipovanie 2026/27</title>
 <style>
-:root{--bg:#eef2f7;--card:#fff;--navy:#0b1220;--muted:#6b7280;--line:#e5e7eb}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:#111827;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif}
-header{background:linear-gradient(145deg,#0b1220,#1b2942);color:#fff;padding:22px 16px 18px;text-align:center;box-shadow:0 3px 14px #0002}
-.logo{font-size:34px;line-height:1}h1{margin:8px 0 2px;font-size:24px;letter-spacing:.2px}.season{font-size:13px;opacity:.72}
-main{max-width:620px;margin:0 auto;padding:14px 12px 28px}.card{background:var(--card);border-radius:18px;box-shadow:0 3px 14px #00000010;overflow:hidden}
-.cardhead{padding:16px 16px 10px}.title{font-size:19px;font-weight:800}.updated{font-size:12px;color:var(--muted);margin-top:4px}
-.row{display:grid;grid-template-columns:48px 1fr 76px;align-items:center;gap:8px;padding:14px 16px;border-top:1px solid var(--line);min-height:66px}
-.row.top{background:#fafafa}.pos{font-size:21px;font-weight:800;text-align:center}.name{font-size:16px;font-weight:750;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.points{font-size:20px;font-weight:850;text-align:right}.ptslabel{display:block;font-size:10px;font-weight:500;color:var(--muted);margin-top:1px}
-.status{padding:16px;color:var(--muted);text-align:center;font-size:14px}.error{color:#b91c1c;text-align:left;line-height:1.45}
-footer{text-align:center;color:#9ca3af;font-size:11px;padding:15px}@media(max-width:380px){.row{grid-template-columns:40px 1fr 68px;padding-left:12px;padding-right:12px}}
-</style></head><body>
-<header><div class="logo">🏒</div><h1>NHL TIPOVANIE</h1><div class="season">2026 / 2027</div></header>
-<main><section class="card"><div class="cardhead"><div class="title">🏆 Priebežné poradie</div><div id="updated" class="updated">Načítavam údaje…</div></div>
-<div id="table" class="status">Načítavam…</div></section><footer>Údaje sa automaticky obnovujú každých 30 sekúnd.</footer></main>
+:root{--bg:#f3f5f8;--card:#fff;--navy:#101827;--line:#e5e7eb;--muted:#64748b;--accent:#2563eb}
+*{box-sizing:border-box} body{margin:0;background:var(--bg);font-family:Arial,Helvetica,sans-serif;color:#111827}
+header{background:var(--navy);color:white;padding:20px 24px}
+header h1{margin:0;font-size:25px} header p{margin:5px 0 0;color:#cbd5e1}
+nav{background:white;border-bottom:1px solid var(--line);padding:10px 16px;display:flex;gap:8px;flex-wrap:wrap;position:sticky;top:0;z-index:5}
+nav button{border:1px solid var(--line);background:white;border-radius:8px;padding:9px 14px;cursor:pointer;font-weight:700}
+nav button.active{background:var(--navy);color:white}
+main{max-width:1150px;margin:22px auto;padding:0 14px}
+.card{background:var(--card);border-radius:16px;box-shadow:0 3px 14px #0000000d;margin-bottom:18px;padding:18px}
+h2{margin:0 0 6px;font-size:21px}.sub{color:var(--muted);font-size:13px;margin-bottom:15px}
+table{width:100%;border-collapse:collapse} th,td{padding:11px 9px;border-bottom:1px solid var(--line);text-align:left;font-size:14px}
+th{background:#f8fafc;font-size:12px;text-transform:uppercase;color:#475569}
+.team{display:flex;align-items:center;gap:10px;font-weight:700}.logo{width:34px;height:34px;object-fit:contain}
+.rank{font-weight:800;width:45px}.points{font-weight:800;text-align:right}
+.badge{display:inline-block;padding:4px 8px;border-radius:999px;background:#eef2ff;color:#3730a3;font-size:12px;font-weight:700}
+.empty{padding:30px;text-align:center;color:var(--muted)}
+.loading{text-align:center;padding:25px;color:var(--muted)}
+@media(max-width:700px){th:nth-child(n+4),td:nth-child(n+4){display:none}header h1{font-size:21px}table{font-size:13px}.card{padding:12px}}
+</style>
+</head>
+<body>
+<header>
+  <h1>🏒 NHL Tipovanie 2026/27</h1>
+  <p>Tabuľka tipovania</p>
+</header>
+<nav id="nav">
+  <button data-tab="standings" class="active">🏆 Poradie</button>
+  <button data-tab="games">🏒 Zápasy</button>
+  <button data-tab="rules">📖 Pravidlá</button>
+  <button data-tab="matrix">📊 Vzájomné zápasy</button>
+</nav>
+<main>
+  <section id="standings" class="tab">
+    <div class="card">
+      <h2>🏆 Poradie</h2>
+      <div class="sub" id="updated">Načítavam údaje z Google Sheets…</div>
+      <div id="standingsBox" class="loading">Načítavam…</div>
+    </div>
+  </section>
+
+  <section id="games" class="tab" hidden>
+    <div class="card">
+      <h2>🏒 Zápasy</h2>
+      <div class="sub">Údaje sa čítajú priamo z Google Sheets.</div>
+      <div id="gamesBox" class="loading">Načítavam…</div>
+    </div>
+  </section>
+
+  <section id="rules" class="tab" hidden>
+    <div class="card">
+      <h2>📖 Pravidlá</h2>
+      <div id="rulesBox" class="loading">Načítavam…</div>
+    </div>
+  </section>
+
+  <section id="matrix" class="tab" hidden>
+    <div class="card">
+      <h2>📊 Tabuľka vzájomných zápasov</h2>
+      <div class="sub">Prehľad bodov jednotlivých tímov vo vzájomných zápasoch.</div>
+      <div id="matrixBox" class="loading">Načítavam…</div>
+    </div>
+  </section>
+</main>
+
 <script>
-const CSV_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vTEW8YvbL3g9kEMJZANuADhkg_ah61vnVrg-1iCqsI_CITLiHXiw4j4uuRKT8lEyQ/pub?output=csv';
-function parseCSV(t){const rows=[];let row=[],cell="",q=false;for(let i=0;i<t.length;i++){const c=t[i],n=t[i+1];if(c=='"'&&q&&n=='"'){cell+='"';i++;continue}if(c=='"'){q=!q;continue}if(c==','&&!q){row.push(cell);cell='';continue}if((c=='\n'||c=='\r')&&!q){if(c=='\r'&&n=='\n')i++;row.push(cell);cell='';if(row.some(v=>v.trim()!==''))rows.push(row);row=[];continue}cell+=c}if(cell!==''||row.length){row.push(cell);rows.push(row)}return rows}
-function esc(s){return s.replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])}
-async function load(){try{const r=await fetch(CSV_URL+'&_='+Date.now(),{cache:'no-store'});if(!r.ok)throw Error('Google Sheets vrátil chybu '+r.status+'.');const rows=parseCSV(await r.text());const data=rows.slice(1).map(r=>({name:(r[1]||'').trim(),points:Number((r[2]||'0').replace(',','.'))||0})).filter(x=>x.name);data.sort((a,b)=>b.points-a.points);if(!data.length){document.getElementById('table').innerHTML='<div class="status">Nenašli sa žiadne mená v stĺpci B.</div>';return}document.getElementById('table').innerHTML=data.map((x,i)=>{const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1);return `<div class="row ${i<3?'top':''}"><div class="pos">${medal}</div><div class="name">${esc(x.name)}</div><div class="points">${x.points}<span class="ptslabel">BODY</span></div></div>`}).join('');document.getElementById('updated').textContent='Aktualizované o '+new Date().toLocaleTimeString('sk-SK',{hour:'2-digit',minute:'2-digit',second:'2-digit'})}catch(e){document.getElementById('table').innerHTML='<div class="status error"><b>Nepodarilo sa načítať údaje.</b><br>'+esc(e.message)+'</div>';document.getElementById('updated').textContent='Chyba pri načítaní'}}
-load();setInterval(load,30000);
-</script></body></html>
+/*
+  GOOGLE SHEETS – PUBLIKOVANÁ TABUĽKA
+  Tento web nepotrebuje Webhosting OKAVER.
+  Stačí, že Google Sheet zostane publikovaný na webe.
+*/
+const PUB_ID = "2PACX-1vTEW8YvbL3g9kEMJZANuADhkg_ah61vnVrg-1iCqsI_CITLiHXiw4j4uuRKT8lEyQ";
+
+const SHEETS = {
+  tipovanie: "Tabuľka tipovania",
+  games: "Games",
+  rules: "Pravidlá",
+  matrix: "Tabuľka vzájomných zápasov",
+  data: "Data",
+  dataTip: "Datatipovanie"
+};
+
+const teamCodes = ["NYR","NYI","COL","MTL","BUF","EDM","PHI","PIT","CHI","BOS","TBL"];
+const codeFromName = {
+  "New York Rangers":"NYR","New York Islanders":"NYI","Colorado Avalanche":"COL",
+  "Montreal Canadiens":"MTL","Buffalo Sabres":"BUF","Edmonton Oilers":"EDM",
+  "Philadelphia Flyers":"PHI","Pittsburgh Penguins":"PIT","Chicago Blackhawks":"CHI",
+  "Boston Bruins":"BOS","Tampa Bay Lightning":"TBL"
+};
+
+function logo(code){
+  return code ? `https://assets.nhle.com/logos/nhl/svg/${code}_light.svg` : "";
+}
+
+async function getSheet(name){
+  const url = `https://docs.google.com/spreadsheets/d/e/${PUB_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(name)}`;
+  const r = await fetch(url);
+  if(!r.ok) throw new Error("Google Sheets HTTP "+r.status);
+  const txt = await r.text();
+  const start = txt.indexOf("{");
+  const end = txt.lastIndexOf("}");
+  if(start<0 || end<0) throw new Error("Neplatná odpoveď Google Sheets");
+  const j = JSON.parse(txt.slice(start,end+1));
+  const cols = (j.table.cols||[]).map(c=>c.label||"");
+  const rows = (j.table.rows||[]).map(row => (row.c||[]).map(c => c ? (c.f ?? c.v ?? "") : ""));
+  return {cols,rows};
+}
+
+function esc(v){
+  return String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+}
+
+function findCol(cols, words){
+  const low=cols.map(x=>String(x).toLowerCase());
+  for(const w of words){
+    const i=low.findIndex(x=>x.includes(w.toLowerCase()));
+    if(i>=0) return i;
+  }
+  return -1;
+}
+
+function teamCell(name){
+  const code=codeFromName[String(name).trim()] || (teamCodes.includes(String(name).trim()) ? String(name).trim() : "");
+  return `<div class="team">${code?`<img class="logo" src="${logo(code)}" alt="">`:""}<span>${esc(name)}</span></div>`;
+}
+
+async function loadStandings(){
+  const box=document.getElementById("standingsBox");
+  try{
+    const d=await getSheet(SHEETS.tipovanie);
+    const nameCol=findCol(d.cols,["tím","team"]);
+    const ptsCol=findCol(d.cols,["body","points"]);
+    let items=d.rows.filter(r=>r.some(x=>String(x).trim()!=="")).map(r=>({
+      name:nameCol>=0?r[nameCol]:"",
+      pts:ptsCol>=0?Number(String(r[ptsCol]).replace(",",".")):0
+    })).filter(x=>x.name);
+    // Ak sú v tabuľke tipujúci hráči, zobraz ich; ak sú tímové riadky, funguje rovnako.
+    items.sort((a,b)=>b.pts-a.pts);
+    if(!items.length){box.innerHTML='<div class="empty">V tabuľke sa nenašli údaje.</div>';return}
+    box.innerHTML=`<table><thead><tr><th>#</th><th>Tipujúci / tím</th><th>Body</th></tr></thead><tbody>`+
+      items.map((x,i)=>`<tr><td class="rank">${i+1}</td><td>${teamCell(x.name)}</td><td class="points">${x.pts}</td></tr>`).join("")+
+      `</tbody></table>`;
+    document.getElementById("updated").textContent="Aktualizované: "+new Date().toLocaleString("sk-SK");
+  }catch(e){box.innerHTML=`<div class="empty">Nepodarilo sa načítať Google Sheet.<br><small>${esc(e.message)}</small></div>`}
+}
+
+async function loadGames(){
+  const box=document.getElementById("gamesBox");
+  try{
+    const d=await getSheet(SHEETS.games);
+    if(!d.rows.length){box.innerHTML='<div class="empty">Žiadne zápasy.</div>';return}
+    const date=findCol(d.cols,["dátum","datum","date"]);
+    const time=findCol(d.cols,["čas","time"]);
+    const home=findCol(d.cols,["domáci","domaci","home"]);
+    const away=findCol(d.cols,["hostia","away"]);
+    const hg=findCol(d.cols,["domáci góly","domaci goly","home goals"]);
+    const ag=findCol(d.cols,["hostia góly","hostia goly","away goals"]);
+    const status=findCol(d.cols,["stav","status"]);
+    const rows=d.rows.filter(r=>r.some(x=>String(x).trim()!==""));
+    box.innerHTML=`<table><thead><tr><th>Dátum</th><th>Čas</th><th>Domáci</th><th>Hostia</th><th>Výsledok</th><th>Stav</th></tr></thead><tbody>`+
+      rows.map(r=>{
+        const score=(hg>=0&&ag>=0&&String(r[hg])!==""&&String(r[ag])!=="")?`${esc(r[hg])} : ${esc(r[ag])}`:"—");
+        return `<tr><td>${esc(date>=0?r[date]:"")}</td><td>${esc(time>=0?r[time]:"")}</td><td>${teamCell(home>=0?r[home]:"")}</td><td>${teamCell(away>=0?r[away]:"")}</td><td><b>${score}</b></td><td><span class="badge">${esc(status>=0?r[status]:"")}</span></td></tr>`;
+      }).join("")+`</tbody></table>`;
+  }catch(e){box.innerHTML=`<div class="empty">Nepodarilo sa načítať zápasy.<br><small>${esc(e.message)}</small></div>`}
+}
+
+async function loadRules(){
+  const box=document.getElementById("rulesBox");
+  try{
+    const d=await getSheet(SHEETS.rules);
+    const rows=d.rows.filter(r=>r.some(x=>String(x).trim()!==""));
+    box.innerHTML=rows.map(r=>`<p>${r.filter(x=>String(x).trim()!=="").map(esc).join(" ")}</p>`).join("");
+  }catch(e){box.innerHTML=`<div class="empty">Nepodarilo sa načítať pravidlá.</div>`}
+}
+
+async function loadMatrix(){
+  const box=document.getElementById("matrixBox");
+  try{
+    const d=await getSheet(SHEETS.matrix);
+    const cols=d.cols.filter(x=>String(x).trim()!=="");
+    const rows=d.rows.filter(r=>r.some(x=>String(x).trim()!==""));
+    box.innerHTML=`<div style="overflow:auto"><table><thead><tr>${cols.map(x=>`<th>${esc(x)}</th>`).join("")}</tr></thead><tbody>`+
+      rows.map(r=>`<tr>${cols.map((_,i)=>`<td>${esc(r[i]??"")}</td>`).join("")}</tr>`).join("")+
+      `</tbody></table></div>`;
+  }catch(e){box.innerHTML=`<div class="empty">Nepodarilo sa načítať tabuľku vzájomných zápasov.</div>`}
+}
+
+document.querySelectorAll("nav button").forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    document.querySelectorAll("nav button").forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
+    document.querySelectorAll(".tab").forEach(s=>s.hidden=true);
+    document.getElementById(btn.dataset.tab).hidden=false;
+  });
+});
+
+loadStandings();
+loadGames();
+loadRules();
+loadMatrix();
+</script>
+</body>
+</html>
