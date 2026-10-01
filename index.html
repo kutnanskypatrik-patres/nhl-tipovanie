@@ -164,17 +164,17 @@ const TEAM_LOGOS={
 };
 
 const TEAM_NAMES={
- "Trapslanders":"Islanders",
- "Traptreal":"Canadiens",
- "Trappalo":"Sabres",
- "Traphilly":"Flyers",
- "Trapburgh":"Penguins",
- "Trapago":"Blackhawks",
- "Trabayting":"Lightning",
- "Trapers":"Rangers",
- "Traporado":"Avalanche",
- "Trapilers":"Oilers",
- "Trampton":"Bruins"
+ "Trapslanders":"Trapslanders",
+ "Traptreal":"Traptreal",
+ "Trappalo":"Trappalo",
+ "Traphilly":"Traphilly",
+ "Trapburgh":"Trapburgh",
+ "Trapago":"Trapago",
+ "Trabayting":"Trabayting",
+ "Trapers":"Trapers",
+ "Traporado":"Traporado",
+ "Trapilers":"Trapilers",
+ "Trampton":"Trampton"
 };
 
 let jsonpCounter=0;
@@ -197,7 +197,7 @@ function headers(t){return t.cols.map(c=>c.label||c.id||"")}
 function clean(v){return String(v??"").replace(/\u00A0/g," ").replace(/\s+/g," ").trim()}
 function esc(v){return String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]))}
 function logoFor(v){return TEAM_LOGOS[clean(v)]||""}
-function shortName(v){return TEAM_NAMES[clean(v)]||clean(v)}
+function clean(v){return TEAM_NAMES[clean(v)]||clean(v)}
 
 function logoHtml(team,cls="team-logo"){
  const src=logoFor(team);
@@ -247,7 +247,7 @@ async function loadHeadToHead(){
    if(c===0){
     html+=`<th>Tím</th>`;
    }else{
-    html+=`<th><div class="matrix-header-team">${logoHtml(v)}<span>${esc(shortName(v))}</span></div></th>`;
+    html+=`<th><div class="matrix-header-team">${logoHtml(v)}<span>${esc(clean(v))}</span></div></th>`;
    }
   }
 
@@ -255,7 +255,7 @@ async function loadHeadToHead(){
 
   data.forEach((row,ri)=>{
    const team=clean(row[0]||"");
-   html+=`<tr><td><div class="matrix-team">${logoHtml(team)}<span>${esc(shortName(team))}</span></div></td>`;
+   html+=`<tr><td><div class="matrix-team">${logoHtml(team)}<span>${esc(clean(team))}</span></div></td>`;
    for(let c=1;c<width;c++){
     const value=row[c]??"";
     const headerTeam=clean(head[c]||"");
