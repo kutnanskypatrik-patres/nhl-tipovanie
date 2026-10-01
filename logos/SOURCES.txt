@@ -1,0 +1,12 @@
+Originálne/aktuálne logo zdroje pre tento projekt.\nTieto URL sú uložené aj preto, aby sa dali logo súbory jednoducho doplniť do priečinka /logos.\n\nnhl.svg = https://i.logocdn.com/nhl/2026/nhl.svg
+bos.svg = https://i.logocdn.com/nhl/2025/boston-bruins.svg
+buf.svg = https://i.logocdn.com/nhl/2020/buffalo-sabres.svg
+chi.svg = https://i.logocdn.com/nhl/1999/chicago-blackhawks.svg
+col.svg = https://i.logocdn.com/nhl/1999/colorado-avalanche.svg
+edm.svg = https://i.logocdn.com/nhl/2022/edmonton-oilers.svg
+mtl.svg = https://i.logocdn.com/nhl/1999/montreal-canadiens.svg
+nyi.svg = https://i.logocdn.com/nhl/2017/new-york-islanders.svg
+nyr.svg = https://i.logocdn.com/nhl/1999/new-york-rangers.svg
+phi.svg = https://i.logocdn.com/nhl/2023/philadelphia-flyers.svg
+pit.svg = https://i.logocdn.com/nhl/2016/pittsburgh-penguins.svg
+tbl.svg = https://i.logocdn.com/nhl/2011/tampa-bay-lightning.svg
