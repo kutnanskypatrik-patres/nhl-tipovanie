@@ -3,1318 +3,302 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-
 <title>NHL RIVALITY KOVARCE</title>
-
 <style>
-:root{
-  --navy:#0b1628;
-  --blue:#1e5da8;
-  --bg:#f2f4f7;
-  --line:#dfe4ea;
-  --text:#122033;
-}
-
+:root{--navy:#0b1628;--bg:#f2f4f7;--text:#122033;--line:#dfe4ea}
 *{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif}
+.hero{min-height:118px;display:flex;align-items:center;gap:28px;padding:18px 5%;background:linear-gradient(110deg,#071321,#152943 52%,#071321);color:#fff;position:relative;overflow:hidden}
+.hero:after{content:"";position:absolute;left:15%;right:5%;bottom:8px;height:3px;background:linear-gradient(90deg,transparent,#e31b23,#fff,#e31b23,transparent)}
+.nhl-badge{width:82px;height:92px;display:grid;place-items:center;flex:none}
+.nhl-badge img{width:78px;height:88px;object-fit:contain;filter:drop-shadow(0 3px 6px #0008)}
+.hero h1{margin:0;font-size:clamp(30px,4vw,56px);font-style:italic;letter-spacing:-1px}
+.hero h1 span{display:block;width:max-content;max-width:100%;border-bottom:4px solid #e31b23;padding-bottom:3px}
+.nav-wrap{background:#fff;border-bottom:1px solid #ddd;padding:12px 4%;position:sticky;top:0;z-index:10}
+.nav{max-width:1250px;margin:auto;display:flex;gap:10px;flex-wrap:wrap}
+.nav button{border:1px solid #d8dee6;background:#fff;color:#17243a;border-radius:10px;padding:12px 18px;font-size:15px;font-weight:700;cursor:pointer}
+.nav button.active,.nav button:hover{background:var(--navy);color:#fff}
+main{max-width:1250px;margin:28px auto;padding:0 18px}
+.card{background:#fff;border-radius:18px;box-shadow:0 5px 22px #17243a12;padding:22px;margin-bottom:22px}
+.card h2{margin:0 0 4px;font-size:28px}
+.updated{color:#728096;font-size:14px;margin-bottom:16px}
+.loading{text-align:center;padding:35px;color:#728096}
+.error{padding:14px;border-radius:10px;background:#fff1f1;color:#9b2020}
+.hidden{display:none}
+footer{text-align:center;color:#8190a5;padding:28px}
 
-body{
-  margin:0;
-  background:var(--bg);
-  color:var(--text);
-  font-family:Arial,Helvetica,sans-serif
-}
+.table-wrap{overflow:auto;-webkit-overflow-scrolling:touch}
+.standings-table{width:100%;border-collapse:separate;border-spacing:0 2px;table-layout:fixed}
+.standings-table thead th{background:linear-gradient(180deg,#142943,#0b1628);color:#fff;padding:13px 14px;text-align:left;font-size:15px}
+.standings-table thead th:first-child{border-radius:9px 0 0 9px;text-align:center;width:64px}
+.standings-table thead th:last-child{border-radius:0 9px 9px 0;text-align:right;width:90px}
+.standings-table tbody td{padding:8px 14px;background:#fff;font-size:17px;height:52px}
+.standings-table tbody tr td:first-child{border-radius:9px 0 0 9px}
+.standings-table tbody tr td:last-child{border-radius:0 9px 9px 0}
+.standings-table tbody tr:nth-child(even) td{background:#fafbfc}
+.standings-table tbody tr.top1 td{background:linear-gradient(90deg,#fff1bf,#fff8e1)}
+.standings-table tbody tr.top2 td{background:linear-gradient(90deg,#edf0f3,#f7f8f9)}
+.standings-table tbody tr.top3 td{background:linear-gradient(90deg,#f9dfcc,#fff0e6)}
+.rank{text-align:center;font-weight:700;font-size:18px}
+.medal{font-size:25px;display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px}
+.team-cell{display:flex;align-items:center;gap:14px;font-weight:600;min-width:0}
+.team-logo{width:46px;height:46px;object-fit:contain;object-position:center;flex:none;display:block}
+.points{text-align:right;font-weight:800;font-size:18px}
 
-/* HLAVICKA */
-.hero{
-  min-height:118px;
-  display:flex;
-  align-items:center;
-  gap:28px;
-  padding:18px 5%;
-  background:linear-gradient(110deg,#071321,#152943 52%,#071321);
-  color:#fff;
-  position:relative;
-  overflow:hidden
-}
+.standings-title{display:flex;align-items:center;gap:12px}
+.standings-title .title-icon{font-size:30px}
+.standings-title h2{margin:0;font-size:28px}
+.standings-subtitle{color:#728096;font-size:14px;margin:3px 0 16px 37px}
 
-.hero:after{
-  content:"";
-  position:absolute;
-  left:15%;
-  right:5%;
-  bottom:8px;
-  height:3px;
-  background:linear-gradient(
-    90deg,
-    transparent,
-    #e31b23,
-    #fff,
-    #e31b23,
-    transparent
-  )
-}
+/* VZÁJOMNÉ ZÁPASY */
+.head-card{padding:18px}
+.head-title{display:flex;align-items:center;gap:10px;margin-bottom:3px}
+.head-title h2{margin:0;font-size:27px}
+.matrix-wrap{overflow:auto;max-width:100%;border-radius:12px}
+.matrix-table{border-collapse:separate;border-spacing:0;min-width:max-content;width:100%;font-size:14px}
+.matrix-table th,.matrix-table td{border-right:1px solid #e0e5eb;border-bottom:1px solid #e0e5eb;text-align:center;white-space:nowrap}
+.matrix-table thead th{position:sticky;top:0;z-index:3;background:linear-gradient(180deg,#142943,#0b1628);color:#fff;height:86px;padding:7px 8px}
+.matrix-table thead th:first-child{left:0;z-index:5;min-width:155px;text-align:left;border-top-left-radius:10px}
+.matrix-table tbody td{height:58px;padding:6px 10px;background:#fff;font-weight:700}
+.matrix-table tbody tr:nth-child(even) td{background:#fafbfc}
+.matrix-table tbody td:first-child{position:sticky;left:0;z-index:2;text-align:left;min-width:155px;background:#fff!important;box-shadow:3px 0 7px #17243a18}
+.matrix-table tbody tr:last-child td:first-child{border-bottom-left-radius:10px}
+.matrix-table thead th:last-child{border-top-right-radius:10px}
+.matrix-table tbody tr:last-child td:last-child{border-bottom-right-radius:10px}
+.matrix-team{display:flex;align-items:center;gap:8px}
+.matrix-team .team-logo{width:38px;height:38px}
+.matrix-header-team{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-width:65px}
+.matrix-header-team .team-logo{width:43px;height:43px}
+.matrix-cell{min-width:65px}
+.matrix-cell.diag{background:#eef1f4!important;color:#9aa5b2}
+.matrix-cell.win{font-weight:800}
+.matrix-empty{color:#aab3bf}
+.matrix-score{font-size:15px}
 
-.nhl-badge{
-  width:82px;
-  height:92px;
-  display:grid;
-  place-items:center;
-  flex:none
-}
+.generic-table{border-collapse:collapse;width:100%;font-size:14px}
+.generic-table th{background:var(--navy);color:#fff;padding:10px;text-align:left}
+.generic-table td{background:#fff;border-bottom:1px solid #e4e7eb;padding:9px}
+.generic-table tr:nth-child(even) td{background:#fafbfc}
 
-.nhl-badge img{
-  width:78px;
-  height:88px;
-  object-fit:contain;
-  filter:drop-shadow(0 3px 6px #0008)
-}
-
-.hero h1{
-  margin:0;
-  font-size:clamp(30px,4vw,56px);
-  font-style:italic;
-  letter-spacing:-1px
-}
-
-.hero h1 span{
-  display:block;
-  width:max-content;
-  max-width:100%;
-  border-bottom:4px solid #e31b23;
-  padding-bottom:3px
-}
-
-/* MENU */
-.nav-wrap{
-  background:#fff;
-  border-bottom:1px solid #ddd;
-  padding:12px 4%;
-  position:sticky;
-  top:0;
-  z-index:10
-}
-
-.nav{
-  max-width:1250px;
-  margin:auto;
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap
-}
-
-.nav button{
-  border:1px solid #d8dee6;
-  background:#fff;
-  color:#17243a;
-  border-radius:10px;
-  padding:12px 18px;
-  font-size:15px;
-  font-weight:700;
-  cursor:pointer
-}
-
-.nav button.active,
-.nav button:hover{
-  background:var(--navy);
-  color:#fff
-}
-
-/* OBSAH */
-main{
-  max-width:1250px;
-  margin:28px auto;
-  padding:0 18px
-}
-
-.card{
-  background:#fff;
-  border-radius:18px;
-  box-shadow:0 5px 22px #17243a12;
-  padding:22px;
-  margin-bottom:22px
-}
-
-.card h2{
-  margin:0 0 4px;
-  font-size:28px
-}
-
-.updated{
-  color:#728096;
-  font-size:14px;
-  margin-bottom:16px
-}
-
-.table-wrap{
-  overflow:auto
-}
-
-/* HLAVNA TABULKA */
-.standings-table{
-  width:100%;
-  border-collapse:separate;
-  border-spacing:0 2px;
-  min-width:0;
-  table-layout:fixed
-}
-
-.standings-table thead th{
-  background:linear-gradient(180deg,#142943,#0b1628);
-  color:#fff;
-  padding:13px 14px;
-  text-align:left;
-  font-size:15px;
-  border:0
-}
-
-.standings-table thead th:first-child{
-  border-radius:9px 0 0 9px;
-  text-align:center;
-  width:64px
-}
-
-.standings-table thead th:last-child{
-  border-radius:0 9px 9px 0;
-  text-align:right;
-  width:90px
-}
-
-.standings-table tbody td{
-  padding:8px 14px;
-  border:0;
-  background:#fff;
-  font-size:17px;
-  height:52px
-}
-
-.standings-table tbody tr td:first-child{
-  border-radius:9px 0 0 9px
-}
-
-.standings-table tbody tr td:last-child{
-  border-radius:0 9px 9px 0
-}
-
-.standings-table tbody tr:not(.top1):not(.top2):not(.top3):nth-child(even) td{
-  background:#fafbfc
-}
-
-.standings-table tbody tr.top1 td{
-  background:linear-gradient(90deg,#fff1bf,#fff8e1)
-}
-
-.standings-table tbody tr.top2 td{
-  background:linear-gradient(90deg,#edf0f3,#f7f8f9)
-}
-
-.standings-table tbody tr.top3 td{
-  background:linear-gradient(90deg,#f9dfcc,#fff0e6)
-}
-
-/* PORADIE */
-.rank{
-  text-align:center;
-  width:64px;
-  font-weight:700;
-  font-size:18px
-}
-
-.rank .medal{
-  font-size:25px;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  width:36px;
-  height:36px
-}
-
-/* TIM */
-.team-cell{
-  display:flex;
-  align-items:center;
-  gap:14px;
-  font-weight:600;
-  min-width:0
-}
-
-/* LOGA */
-.team-logo{
-  width:46px;
-  height:46px;
-  object-fit:contain;
-  object-position:center;
-  flex:none;
-  display:block
-}
-
-.points{
-  text-align:right;
-  font-weight:800;
-  width:90px;
-  font-size:18px
-}
-
-.standings-card{
-  padding:24px 22px 18px
-}
-
-.standings-title{
-  display:flex;
-  align-items:center;
-  gap:12px
-}
-
-.standings-title .title-icon{
-  font-size:30px
-}
-
-.standings-title h2{
-  margin:0;
-  font-size:28px
-}
-
-.standings-subtitle{
-  color:#728096;
-  font-size:14px;
-  margin:3px 0 16px 37px
-}
-
-.loading{
-  text-align:center;
-  padding:35px;
-  color:#728096
-}
-
-.error{
-  padding:14px;
-  border-radius:10px;
-  background:#fff1f1;
-  color:#9b2020
-}
-
-.hidden{
-  display:none
-}
-
-footer{
-  text-align:center;
-  color:#8190a5;
-  padding:28px
-}
-
-/* MOBIL */
 @media(max-width:650px){
-
-  body{
-    font-size:14px
-  }
-
-  .hero{
-    min-height:82px;
-    padding:10px 14px;
-    gap:10px
-  }
-
-  .nhl-badge{
-    width:48px;
-    height:58px
-  }
-
-  .nhl-badge img{
-    width:46px;
-    height:54px
-  }
-
-  .hero h1{
-    font-size:24px;
-    letter-spacing:-.5px
-  }
-
-  .hero h1 span{
-    border-bottom-width:3px
-  }
-
-  .nav-wrap{
-    padding:7px 8px
-  }
-
-  .nav{
-    gap:6px;
-    flex-wrap:nowrap;
-    overflow-x:auto;
-    padding-bottom:2px
-  }
-
-  .nav button{
-    white-space:nowrap;
-    padding:9px 11px;
-    font-size:12px;
-    border-radius:8px
-  }
-
-  main{
-    margin:12px auto;
-    padding:0 8px
-  }
-
-  .card{
-    border-radius:12px;
-    padding:11px;
-    margin-bottom:12px
-  }
-
-  .standings-card{
-    padding:12px 9px 10px
-  }
-
-  .standings-title{
-    gap:7px
-  }
-
-  .standings-title .title-icon{
-    font-size:23px
-  }
-
-  .standings-title h2{
-    font-size:17px;
-    line-height:1.2
-  }
-
-  .standings-subtitle{
-    font-size:11px;
-    margin:3px 0 9px 30px
-  }
-
-  .standings-table thead th{
-    padding:8px 6px;
-    font-size:12px
-  }
-
-  .standings-table thead th:first-child{
-    width:38px
-  }
-
-  .standings-table thead th:nth-child(2){
-    width:52px;
-    font-size:0
-  }
-
-  .standings-table thead th:last-child{
-    width:48px;
-    text-align:center
-  }
-
-  .standings-table tbody td{
-    padding:4px 5px;
-    height:42px;
-    font-size:13px
-  }
-
-  .rank{
-    width:38px;
-    font-size:13px
-  }
-
-  .rank .medal{
-    font-size:20px;
-    width:28px;
-    height:28px
-  }
-
-  .team-cell{
-    gap:6px
-  }
-
-  .team-logo{
-    width:32px;
-    height:32px
-  }
-
-  .points{
-    width:48px;
-    font-size:14px;
-    text-align:center
-  }
-
-  footer{
-    padding:16px 8px;
-    font-size:11px
-  }
+ .hero{min-height:82px;padding:10px 14px;gap:10px}.nhl-badge{width:48px;height:58px}.nhl-badge img{width:46px;height:54px}
+ .hero h1{font-size:24px}.hero h1 span{border-bottom-width:3px}
+ .nav-wrap{padding:7px 8px}.nav{gap:6px;flex-wrap:nowrap;overflow-x:auto;padding-bottom:2px}
+ .nav button{white-space:nowrap;padding:9px 11px;font-size:12px;border-radius:8px}
+ main{margin:12px auto;padding:0 8px}.card{border-radius:12px;padding:11px;margin-bottom:12px}
+ .standings-title{gap:7px}.standings-title .title-icon{font-size:23px}.standings-title h2{font-size:17px;line-height:1.2}
+ .standings-subtitle{font-size:11px;margin:3px 0 9px 30px}
+ .standings-table thead th{padding:8px 6px;font-size:12px}.standings-table thead th:first-child{width:38px}
+ .standings-table thead th:nth-child(2){width:52px;font-size:0}.standings-table thead th:last-child{width:48px;text-align:center}
+ .standings-table tbody td{padding:4px 5px;height:42px;font-size:13px}.rank{font-size:13px}.medal{font-size:20px;width:28px;height:28px}
+ .team-cell{gap:6px}.team-logo{width:32px;height:32px}.points{font-size:14px;text-align:center}
+ .head-card{padding:10px}.head-title h2{font-size:18px}.matrix-table{font-size:11px}
+ .matrix-table thead th{height:72px;padding:4px 5px}.matrix-table thead th:first-child{min-width:112px}
+ .matrix-table tbody td{height:48px;padding:4px 6px}.matrix-table tbody td:first-child{min-width:112px}
+ .matrix-header-team{min-width:50px;gap:2px;font-size:9px}.matrix-header-team .team-logo{width:30px;height:30px}
+ .matrix-team .team-logo{width:28px;height:28px}.matrix-cell{min-width:50px}.matrix-score{font-size:12px}
+ footer{padding:16px 8px;font-size:11px}
 }
 </style>
 </head>
-
 <body>
 
 <header class="hero">
-
-  <div class="nhl-badge">
-    <img
-      src="https://assets.nhle.com/logos/nhl/svg/nhl_logowhite.svg"
-      alt="NHL"
-      onerror="this.parentElement.textContent='NHL'"
-    >
-  </div>
-
-  <h1>
-    <span>NHL RIVALITY KOVARCE</span>
-  </h1>
-
+ <div class="nhl-badge"><img src="https://assets.nhle.com/logos/nhl/svg/nhl_logowhite.svg" alt="NHL" onerror="this.parentElement.textContent='NHL'"></div>
+ <h1><span>NHL RIVALITY KOVARCE</span></h1>
 </header>
 
 <div class="nav-wrap">
-
-  <nav class="nav">
-
-    <button
-      class="active"
-      data-page="standings"
-    >
-      🏆 Tabuľka tipovania zápasov
-    </button>
-
-    <button data-page="games">
-      🏒 Zápasy
-    </button>
-
-    <button data-page="head">
-      📊 Vzájomné zápasy
-    </button>
-
-    <button data-page="rules">
-      📖 Pravidlá
-    </button>
-
-  </nav>
-
+ <nav class="nav">
+  <button class="active" data-page="standings">🏆 Tabuľka tipovania zápasov</button>
+  <button data-page="games">🏒 Zápasy</button>
+  <button data-page="head">📊 Vzájomné zápasy</button>
+  <button data-page="rules">📖 Pravidlá</button>
+ </nav>
 </div>
 
 <main>
-
 <section id="standings" class="page">
-
-  <div class="card standings-card">
-
-    <div class="standings-title">
-
-      <span class="title-icon">
-        🏆
-      </span>
-
-      <h2>
-        NHL 2026/27 – Tabuľka tipovania zápasov
-      </h2>
-
-    </div>
-
-    <div
-      class="standings-subtitle"
-      id="standingsUpdated"
-    >
-      Načítavam údaje z Google Sheets…
-    </div>
-
-    <div
-      id="standingsContent"
-      class="loading"
-    >
-      Načítavam…
-    </div>
-
-  </div>
-
+ <div class="card">
+  <div class="standings-title"><span class="title-icon">🏆</span><h2>NHL 2026/27 – Tabuľka tipovania zápasov</h2></div>
+  <div class="standings-subtitle" id="standingsUpdated">Načítavam údaje z Google Sheets…</div>
+  <div id="standingsContent" class="loading">Načítavam…</div>
+ </div>
 </section>
-
 
 <section id="games" class="page hidden">
-
-  <div class="card">
-
-    <h2>🏒 Zápasy</h2>
-
-    <div class="updated">
-      Údaje sa načítajú priamo z Google Sheets.
-    </div>
-
-    <div
-      id="gamesContent"
-      class="loading"
-    >
-      Načítavam…
-    </div>
-
-  </div>
-
+ <div class="card"><h2>🏒 Zápasy</h2><div class="updated">Údaje sa načítajú priamo z Google Sheets.</div><div id="gamesContent" class="loading">Načítavam…</div></div>
 </section>
-
 
 <section id="head" class="page hidden">
-
-  <div class="card">
-
-    <h2>
-      📊 Tabuľka vzájomných zápasov
-    </h2>
-
-    <div class="updated">
-      Údaje sa načítajú priamo z Google Sheets.
-    </div>
-
-    <div
-      id="headContent"
-      class="loading"
-    >
-      Načítavam…
-    </div>
-
-  </div>
-
+ <div class="card head-card">
+  <div class="head-title"><span>📊</span><h2>Tabuľka vzájomných zápasov</h2></div>
+  <div class="updated">Údaje sa načítajú priamo z Google Sheets.</div>
+  <div id="headContent" class="loading">Načítavam…</div>
+ </div>
 </section>
-
 
 <section id="rules" class="page hidden">
-
-  <div class="card">
-
-    <h2>
-      📖 Pravidlá
-    </h2>
-
-    <div
-      id="rulesContent"
-      class="loading"
-    >
-      Načítavam…
-    </div>
-
-  </div>
-
+ <div class="card"><h2>📖 Pravidlá</h2><div id="rulesContent" class="loading">Načítavam…</div></div>
 </section>
-
 </main>
 
-<footer>
-  NHL RIVALITY KOVARCE · NHL 2026/27
-</footer>
-
+<footer>NHL RIVALITY KOVARCE · NHL 2026/27</footer>
 
 <script>
+const SPREADSHEET_ID="1mi6E8lHthYRFL-BPL48FkG7vPUYCO9l_";
+const SHEETS={standings:"Tabuľka tipovania",games:"Games",head:"Tabuľka vzájomných zápasov",rules:"Pravidlá"};
 
-const SPREADSHEET_ID =
-"1mi6E8lHthYRFL-BPL48FkG7vPUYCO9l_";
-
-
-const SHEETS = {
-
-  standings:"Tabuľka tipovania",
-
-  games:"Games",
-
-  head:"Tabuľka vzájomných zápasov",
-
-  rules:"Pravidlá"
-
+const TEAM_LOGOS={
+ "Trapslanders":"logos/nyi.png",
+ "Traptreal":"logos/mtl.png",
+ "Trappalo":"logos/buf.png",
+ "Traphilly":"logos/phi.png",
+ "Trapburgh":"logos/pit.png",
+ "Trapago":"logos/chi.png",
+ "Trabayting":"logos/tbl.png",
+ "Trapers":"logos/nyr.png",
+ "Traporado":"logos/col.png",
+ "Trapilers":"logos/edm.png",
+ "Trampton":"logos/bos.png"
 };
 
-
-/*
-====================================================
-LOGÁ TÍMOV
-====================================================
-
-Všetky logá sú uložené priamo v GitHub repozitári:
-
-/logos/
-
-Preto nepoužívame ESPN ani iný externý server.
-
-====================================================
-*/
-
-const TEAM_LOGOS = {
-
-  "Trapslanders":
-    "logos/nyi.png",
-
-  "Traptreal":
-    "logos/mtl.png",
-
-  "Trappalo":
-    "logos/buf.png",
-
-  "Traphilly":
-    "logos/phi.png",
-
-"Trapburgh":
-  "logos/pit.png",
-
-  "Trapago":
-    "logos/chi.png",
-
-  "Trabayting":
-    "logos/tbl.png",
-
-  "Trapers":
-    "logos/nyr.png",
-
-  "Traporado":
-    "logos/col.png",
-
-  "Trapilers":
-    "logos/edm.png",
-
-  "Trampton":
-    "logos/bos.png"
-
+const TEAM_NAMES={
+ "Trapslanders":"Islanders",
+ "Traptreal":"Canadiens",
+ "Trappalo":"Sabres",
+ "Traphilly":"Flyers",
+ "Trapburgh":"Penguins",
+ "Trapago":"Blackhawks",
+ "Trabayting":"Lightning",
+ "Trapers":"Rangers",
+ "Traporado":"Avalanche",
+ "Trapilers":"Oilers",
+ "Trampton":"Bruins"
 };
 
+let jsonpCounter=0;
 
-let jsonpCounter = 0;
-
-
-/*
-====================================================
-GOOGLE SHEETS
-====================================================
-*/
-
-function getSheet(sheet, range="") {
-
-  return new Promise((resolve,reject)=>{
-
-    const cb =
-      "__gs_cb_" + (++jsonpCounter);
-
-    const script =
-      document.createElement("script");
-
-    const timeout =
-      setTimeout(()=>{
-
-        cleanup();
-
-        reject(
-          new Error(
-            "Google Sheets neodpovedá. Skontroluj, či je tabuľka zverejnená na webe."
-          )
-        );
-
-      },15000);
-
-
-    function cleanup(){
-
-      clearTimeout(timeout);
-
-      script.remove();
-
-      try{
-
-        delete window[cb];
-
-      }catch(_){
-
-        window[cb] = undefined;
-
-      }
-
-    }
-
-
-    window[cb] = data => {
-
-      cleanup();
-
-      if(!data || !data.table){
-
-        reject(
-          new Error(
-            "Google Sheets vrátil neplatné údaje."
-          )
-        );
-
-      }else{
-
-        resolve(data.table);
-
-      }
-
-    };
-
-
-    script.onerror = ()=>{
-
-      cleanup();
-
-      reject(
-        new Error(
-          "Nepodarilo sa pripojiť ku Google Sheets."
-        )
-      );
-
-    };
-
-
-    const rangePart =
-      range
-      ? `&range=${encodeURIComponent(range)}`
-      : "";
-
-
-    script.src =
-      `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?sheet=${encodeURIComponent(sheet)}${rangePart}&tqx=${encodeURIComponent(`responseHandler:${cb}`)}&cbust=${Date.now()}`;
-
-
-    document.head.appendChild(script);
-
-  });
-
+function getSheet(sheet,range=""){
+ return new Promise((resolve,reject)=>{
+  const cb="__gs_cb_"+(++jsonpCounter),script=document.createElement("script");
+  const timeout=setTimeout(()=>{cleanup();reject(new Error("Google Sheets neodpovedá. Skontroluj, či je tabuľka zverejnená na webe."))},15000);
+  function cleanup(){clearTimeout(timeout);script.remove();try{delete window[cb]}catch(_){window[cb]=undefined}}
+  window[cb]=data=>{cleanup();if(!data||!data.table)reject(new Error("Google Sheets vrátil neplatné údaje."));else resolve(data.table)};
+  script.onerror=()=>{cleanup();reject(new Error("Nepodarilo sa pripojiť ku Google Sheets."))};
+  const rangePart=range?`&range=${encodeURIComponent(range)}`:"";
+  script.src=`https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?sheet=${encodeURIComponent(sheet)}${rangePart}&tqx=${encodeURIComponent(`responseHandler:${cb}`)}&cbust=${Date.now()}`;
+  document.head.appendChild(script);
+ });
 }
 
+function rows(t){return t.rows.map(r=>r.c.map(c=>c&&c.v!=null?c.v:""))}
+function headers(t){return t.cols.map(c=>c.label||c.id||"")}
+function clean(v){return String(v??"").replace(/\u00A0/g," ").replace(/\s+/g," ").trim()}
+function esc(v){return String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]))}
+function logoFor(v){return TEAM_LOGOS[clean(v)]||""}
+function shortName(v){return TEAM_NAMES[clean(v)]||clean(v)}
 
-function rows(t){
-
-  return t.rows.map(
-    r =>
-      r.c.map(
-        c =>
-          c && c.v != null
-          ? c.v
-          : ""
-      )
-  );
-
+function logoHtml(team,cls="team-logo"){
+ const src=logoFor(team);
+ return src?`<img class="${cls}" src="${src}" alt="${esc(team)}" loading="eager" onerror="this.style.display='none'">`:"";
 }
-
-
-function headers(t){
-
-  return t.cols.map(
-    c =>
-      c.label ||
-      c.id ||
-      ""
-  );
-
-}
-
-
-function esc(v){
-
-  return String(v ?? "")
-    .replace(
-      /[&<>"']/g,
-      m =>
-        ({
-          "&":"&amp;",
-          "<":"&lt;",
-          ">":"&gt;",
-          '"':"&quot;",
-          "'":"&#39;"
-        }[m])
-    );
-
-}
-
-
-/*
-====================================================
-HLAVNÁ TABUĽKA
-====================================================
-*/
 
 async function loadStandings(){
-
-  const el =
-    document.getElementById(
-      "standingsContent"
-    );
-
-
-  try{
-
-    const t =
-      await getSheet(
-        SHEETS.standings,
-        "A4:D"
-      );
-
-
-    const r =
-      rows(t);
-
-
-    const d =
-      r
-      .filter(
-        x => x.some(Boolean)
-      )
-      .map(
-        x => ({
-
-          rank:x[0] || "",
-
-          team:x[2] || "",
-
-          points:
-            Number(
-              String(
-                x[3] ?? ""
-              ).replace(",",".")
-            ) || 0
-
-        })
-      )
-      .filter(
-        x => x.team
-      );
-
-
-    el.innerHTML = `
-
-      <div class="table-wrap">
-
-        <table class="standings-table">
-
-          <thead>
-
-            <tr>
-
-              <th class="rank">
-                #
-              </th>
-
-              <th>
-                Tím / Meno
-              </th>
-
-              <th class="points">
-                Body
-              </th>
-
-            </tr>
-
-          </thead>
-
-
-          <tbody>
-
-            ${
-              d.map(
-                (x,i)=>{
-
-                  const rank =
-                    Number(x.rank) ||
-                    i + 1;
-
-
-                  const medal =
-                    rank === 1
-                    ? "🥇"
-                    : rank === 2
-                    ? "🥈"
-                    : rank === 3
-                    ? "🥉"
-                    : rank;
-
-
-                  const cls =
-                    rank === 1
-                    ? "top1"
-                    : rank === 2
-                    ? "top2"
-                    : rank === 3
-                    ? "top3"
-                    : "";
-
-
-                  /*
-                  ----------------------------------
-                  DÔLEŽITÉ:
-                  Logo sa berie IBA z TEAM_LOGOS.
-                  ----------------------------------
-                  */
-
-                  const logoUrl =
-                    TEAM_LOGOS[x.team] ||
-                    "";
-
-
-                  const logo =
-                    logoUrl
-
-                    ?
-
-                    `<img
-                      class="team-logo"
-                      src="${logoUrl}"
-                      alt="${esc(x.team)}"
-                      loading="eager"
-                      onerror="this.style.display='none'"
-                    >`
-
-                    :
-
-                    "";
-
-
-                  return `
-
-                    <tr class="${cls}">
-
-                      <td class="rank">
-
-                        ${
-                          rank <= 3
-
-                          ?
-
-                          `<span class="medal">
-                            ${medal}
-                          </span>`
-
-                          :
-
-                          rank
-                        }
-
-                      </td>
-
-
-                      <td>
-
-                        <div class="team-cell">
-
-                          ${logo}
-
-                          <span>
-                            ${esc(x.team)}
-                          </span>
-
-                        </div>
-
-                      </td>
-
-
-                      <td class="points">
-
-                        ${x.points}
-
-                      </td>
-
-                    </tr>
-
-                  `;
-
-                }
-              ).join("")
-            }
-
-          </tbody>
-
-        </table>
-
-      </div>
-
-    `;
-
-
-    document.getElementById(
-      "standingsUpdated"
-    ).textContent =
-      "Aktualizované: " +
-      new Date().toLocaleString(
-        "sk-SK"
-      );
-
-
-  }catch(e){
-
-    el.innerHTML = `
-
-      <div class="error">
-
-        Nepodarilo sa načítať Google Sheets:
-
-        ${esc(e.message)}
-
-      </div>
-
-    `;
-
-  }
-
+ const el=document.getElementById("standingsContent");
+ try{
+  const t=await getSheet(SHEETS.standings,"A4:D"),r=rows(t);
+  const d=r.filter(x=>x.some(Boolean)).map(x=>({rank:x[0]||"",team:clean(x[2]||""),points:Number(String(x[3]??"").replace(",","."))||0})).filter(x=>x.team);
+  el.innerHTML=`<div class="table-wrap"><table class="standings-table"><thead><tr><th class="rank">#</th><th>Tím / Meno</th><th class="points">Body</th></tr></thead><tbody>${
+   d.map((x,i)=>{
+    const rank=Number(x.rank)||i+1,medal=rank===1?"🥇":rank===2?"🥈":rank===3?"🥉":rank,cls=rank===1?"top1":rank===2?"top2":rank===3?"top3":"";
+    return `<tr class="${cls}"><td class="rank">${rank<=3?`<span class="medal">${medal}</span>`:rank}</td><td><div class="team-cell">${logoHtml(x.team)}<span>${esc(x.team)}</span></div></td><td class="points">${x.points}</td></tr>`;
+   }).join("")
+  }</tbody></table></div>`;
+  document.getElementById("standingsUpdated").textContent="Aktualizované: "+new Date().toLocaleString("sk-SK");
+ }catch(e){el.innerHTML=`<div class="error">Nepodarilo sa načítať Google Sheets: ${esc(e.message)}</div>`}
 }
 
-
 /*
-====================================================
-OSTATNÉ TABUĽKY
-====================================================
+  VZÁJOMNÉ ZÁPASY:
+  Prvý riadok Google Sheets sa použije ako hlavička tímov.
+  Prvý stĺpec sa použije ako názov tímu.
+  Ostatné bunky zostanú presne podľa Google Sheets.
 */
+async function loadHeadToHead(){
+ const el=document.getElementById("headContent");
+ try{
+  const t=await getSheet(SHEETS.head),h=headers(t),r=rows(t).filter(x=>x.some(Boolean));
+  if(!r.length){el.innerHTML="<div class='error'>Tabuľka vzájomných zápasov je v Google Sheets prázdna.</div>";return}
 
-async function loadGeneric(
-  sheet,
-  id
-){
+  let head=h.slice();
+  let data=r.slice();
 
-  const el =
-    document.getElementById(id);
+  // Ak Google Sheets vracia prvý riadok ako dáta a hlavičky sú len A/B/C..., použijeme ho ako hlavičku.
+  const looksGeneric=head.every((v,i)=>!v||v===String.fromCharCode(65+i));
+  if(looksGeneric && data.length){head=data.shift()}
 
+  const width=Math.max(head.length,...data.map(x=>x.length));
 
-  try{
+  let html=`<div class="matrix-wrap"><table class="matrix-table"><thead><tr>`;
 
-    const t =
-      await getSheet(sheet);
-
-
-    const h =
-      headers(t);
-
-
-    const r =
-      rows(t);
-
-
-    el.innerHTML = `
-
-      <div class="table-wrap">
-
-        <table>
-
-          <thead>
-
-            <tr>
-
-              ${
-                h.map(
-                  x =>
-                    `<th>
-                      ${esc(x)}
-                    </th>`
-                ).join("")
-              }
-
-            </tr>
-
-          </thead>
-
-
-          <tbody>
-
-            ${
-              r
-              .filter(
-                x => x.some(Boolean)
-              )
-              .map(
-                x =>
-                  `<tr>
-
-                    ${
-                      x.map(
-                        v =>
-                          `<td>
-                            ${esc(v)}
-                          </td>`
-                      ).join("")
-                    }
-
-                  </tr>`
-              ).join("")
-            }
-
-          </tbody>
-
-        </table>
-
-      </div>
-
-    `;
-
-
-  }catch(e){
-
-    el.innerHTML = `
-
-      <div class="error">
-
-        Nepodarilo sa načítať Google Sheets:
-
-        ${esc(e.message)}
-
-      </div>
-
-    `;
-
+  for(let c=0;c<width;c++){
+   const v=clean(head[c]||"");
+   if(c===0){
+    html+=`<th>Tím</th>`;
+   }else{
+    html+=`<th><div class="matrix-header-team">${logoHtml(v)}<span>${esc(shortName(v))}</span></div></th>`;
+   }
   }
 
+  html+=`</tr></thead><tbody>`;
+
+  data.forEach((row,ri)=>{
+   const team=clean(row[0]||"");
+   html+=`<tr><td><div class="matrix-team">${logoHtml(team)}<span>${esc(shortName(team))}</span></div></td>`;
+   for(let c=1;c<width;c++){
+    const value=row[c]??"";
+    const headerTeam=clean(head[c]||"");
+    const diag=team && headerTeam && team===headerTeam;
+    let cls="matrix-cell"+(diag?" diag":"");
+    let display=value===""?"—":esc(value);
+    html+=`<td class="${cls}">${display}</td>`;
+   }
+   html+=`</tr>`;
+  });
+
+  html+=`</tbody></table></div>`;
+  el.innerHTML=html;
+ }catch(e){el.innerHTML=`<div class="error">Nepodarilo sa načítať Google Sheets: ${esc(e.message)}</div>`}
 }
 
-
-/*
-====================================================
-PRAVIDLÁ
-====================================================
-*/
+async function loadGeneric(sheet,id){
+ const el=document.getElementById(id);
+ try{
+  const t=await getSheet(sheet),h=headers(t),r=rows(t);
+  el.innerHTML=`<div class="table-wrap"><table class="generic-table"><thead><tr>${h.map(x=>`<th>${esc(x)}</th>`).join("")}</tr></thead><tbody>${r.filter(x=>x.some(Boolean)).map(x=>`<tr>${x.map(v=>`<td>${esc(v)}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
+ }catch(e){el.innerHTML=`<div class="error">Nepodarilo sa načítať Google Sheets: ${esc(e.message)}</div>`}
+}
 
 async function loadRules(){
-
-  const el =
-    document.getElementById(
-      "rulesContent"
-    );
-
-
-  try{
-
-    const t =
-      await getSheet(
-        SHEETS.rules
-      );
-
-
-    const r =
-      rows(t);
-
-
-    el.innerHTML =
-      r
-      .filter(
-        x => x.some(Boolean)
-      )
-      .map(
-        x =>
-          `<p>
-            ${x.map(esc).join(" ")}
-          </p>`
-      )
-      .join("");
-
-
-  }catch(e){
-
-    el.innerHTML = `
-
-      <div class="error">
-
-        Nepodarilo sa načítať pravidlá:
-
-        ${esc(e.message)}
-
-      </div>
-
-    `;
-
-  }
-
+ const el=document.getElementById("rulesContent");
+ try{
+  const t=await getSheet(SHEETS.rules),r=rows(t);
+  el.innerHTML=r.filter(x=>x.some(Boolean)).map(x=>`<p>${x.map(esc).join(" ")}</p>`).join("");
+ }catch(e){el.innerHTML=`<div class="error">Nepodarilo sa načítať pravidlá: ${esc(e.message)}</div>`}
 }
 
-
-/*
-====================================================
-MENU
-====================================================
-*/
-
-document
-.querySelectorAll(".nav button")
-.forEach(
-
-  btn =>
-
-    btn.addEventListener(
-      "click",
-      ()=>{
-
-        document
-        .querySelectorAll(
-          ".nav button"
-        )
-        .forEach(
-          b =>
-            b.classList.remove(
-              "active"
-            )
-        );
-
-
-        btn.classList.add(
-          "active"
-        );
-
-
-        document
-        .querySelectorAll(
-          ".page"
-        )
-        .forEach(
-          p =>
-            p.classList.add(
-              "hidden"
-            )
-        );
-
-
-        document
-        .getElementById(
-          btn.dataset.page
-        )
-        .classList.remove(
-          "hidden"
-        );
-
-
-        if(
-          btn.dataset.page ===
-          "games"
-        ){
-
-          loadGeneric(
-            SHEETS.games,
-            "gamesContent"
-          );
-
-        }
-
-
-        if(
-          btn.dataset.page ===
-          "head"
-        ){
-
-          loadGeneric(
-            SHEETS.head,
-            "headContent"
-          );
-
-        }
-
-
-        if(
-          btn.dataset.page ===
-          "rules"
-        ){
-
-          loadRules();
-
-        }
-
-      }
-    )
-
-);
-
-
-/*
-====================================================
-SPUSTENIE
-====================================================
-*/
+document.querySelectorAll(".nav button").forEach(btn=>btn.addEventListener("click",()=>{
+ document.querySelectorAll(".nav button").forEach(b=>b.classList.remove("active"));
+ btn.classList.add("active");
+ document.querySelectorAll(".page").forEach(p=>p.classList.add("hidden"));
+ document.getElementById(btn.dataset.page).classList.remove("hidden");
+ if(btn.dataset.page==="games")loadGeneric(SHEETS.games,"gamesContent");
+ if(btn.dataset.page==="head")loadHeadToHead();
+ if(btn.dataset.page==="rules")loadRules();
+}));
 
 loadStandings();
-
 </script>
-
 </body>
 </html>
