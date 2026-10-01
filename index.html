@@ -18,7 +18,7 @@
 const SPREADSHEET_ID="1mi6E8lHthYRFL-BPL48FkG7vPUYCO9l_";
 const SHEETS={standings:"Tabuľka tipovania",games:"Games",head:"Tabuľka vzájomných zápasov",rules:"Pravidlá"};
 let jsonpCounter=0;
-function getSheet(sheet){
+function getSheet(sheet,range=""){
   return new Promise((resolve,reject)=>{
     const cb="__gs_cb_"+(++jsonpCounter);
     const script=document.createElement("script");
@@ -26,13 +26,20 @@ function getSheet(sheet){
     function cleanup(){clearTimeout(timeout);script.remove();try{delete window[cb]}catch(_){window[cb]=undefined}}
     window[cb]=data=>{cleanup();if(!data||!data.table)reject(new Error("Google Sheets vrátil neplatné údaje."));else resolve(data.table)};
     script.onerror=()=>{cleanup();reject(new Error("Nepodarilo sa pripojiť ku Google Sheets."))};
-    const params=new URLSearchParams({sheet,tqx:`responseHandler:${cb}`});
-    script.src=`https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?sheet=${encodeURIComponent(sheet)}&tqx=${encodeURIComponent(`responseHandler:${cb}`)}`;
+    const rangePart=range?`&range=${encodeURIComponent(range)}`:"";
+    script.src=`https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?sheet=${encodeURIComponent(sheet)}${rangePart}&tqx=${encodeURIComponent(`responseHandler:${cb}`)}&cbust=${Date.now()}`;
     document.head.appendChild(script);
   });
 }
 function rows(t){return t.rows.map(r=>r.c.map(c=>c&&c.v!=null?c.v:""))}function headers(t){return t.cols.map(c=>c.label||c.id||"")}function esc(v){return String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]))}
-async function loadStandings(){const el=document.getElementById("standingsContent");try{const t=await getSheet(SHEETS.standings),h=headers(t),r=rows(t);const nameCol=h.findIndex(x=>/meno|tím/i.test(x));const pointsCol=h.findIndex(x=>/body/i.test(x));const logoCol=h.findIndex(x=>/logo/i.test(x));if(nameCol<0||pointsCol<0)throw new Error("V hárku Tabuľka tipovania sa nenašli stĺpce Meno/Tím a Body.");const d=r.filter(x=>x.some(Boolean)).map(x=>({team:x[nameCol]||"",points:Number(x[pointsCol])||0,logo:logoCol>=0?x[logoCol]:""})).filter(x=>x.team);el.innerHTML=`<div class="table-wrap"><table><thead><tr><th class="rank">#</th><th>Tím / Meno</th><th class="points">Body</th></tr></thead><tbody>${d.map((x,i)=>`<tr><td class="rank">${i<3?["🥇","🥈","🥉"][i]:i+1}</td><td>${x.logo&&/^https?:/i.test(x.logo)?`<img class="team-logo" src="${esc(x.logo)}" alt="">`:""}${esc(x.team)}</td><td class="points">${x.points}</td></tr>`).join("")}</tbody></table></div>`;document.getElementById("standingsUpdated").textContent="Aktualizované: "+new Date().toLocaleString("sk-SK")}catch(e){el.innerHTML=`<div class="error">Nepodarilo sa načítať Google Sheets: ${esc(e.message)}</div>`}}
+async function loadStandings(){const el=document.getElementById("standingsContent");try{
+  // V hárku sú názov a poznámka nad skutočnou hlavičkou. Čítame preto priamo A4:D.
+  const t=await getSheet(SHEETS.standings,"A4:D"),r=rows(t);
+  const d=r.filter(x=>x.some(Boolean)).map(x=>({rank:x[0]||"",logo:x[1]||"",team:x[2]||"",points:Number(String(x[3]??"").replace(",","."))||0})).filter(x=>x.team);
+  // Poradie nech zodpovedá poradiu vypočítanému v Google Sheete.
+  el.innerHTML=`<div class="table-wrap"><table><thead><tr><th class="rank">#</th><th>Tím / Meno</th><th class="points">Body</th></tr></thead><tbody>${d.map((x,i)=>{const rank=Number(x.rank)||i+1;const medal=rank===1?"🥇":rank===2?"🥈":rank===3?"🥉":rank;return `<tr><td class="rank">${medal}</td><td>${x.logo&&/^https?:/i.test(String(x.logo))?`<img class="team-logo" src="${esc(x.logo)}" alt="">`:""}${esc(x.team)}</td><td class="points">${x.points}</td></tr>`}).join("")}</tbody></table></div>`;
+  document.getElementById("standingsUpdated").textContent="Aktualizované: "+new Date().toLocaleString("sk-SK");
+}catch(e){el.innerHTML=`<div class="error">Nepodarilo sa načítať Google Sheets: ${esc(e.message)}</div>`}}
 async function loadGeneric(sheet,id){const el=document.getElementById(id);try{const t=await getSheet(sheet),h=headers(t),r=rows(t);el.innerHTML=`<div class="table-wrap"><table><thead><tr>${h.map(x=>`<th>${esc(x)}</th>`).join("")}</tr></thead><tbody>${r.filter(x=>x.some(Boolean)).map(x=>`<tr>${x.map(v=>`<td>${esc(v)}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`}catch(e){el.innerHTML=`<div class="error">Nepodarilo sa načítať Google Sheets: ${esc(e.message)}</div>`}}
 async function loadRules(){const el=document.getElementById("rulesContent");try{const t=await getSheet(SHEETS.rules),r=rows(t);el.innerHTML=r.filter(x=>x.some(Boolean)).map(x=>`<p>${x.map(esc).join(" ")}</p>`).join("")}catch(e){el.innerHTML=`<div class="error">Nepodarilo sa načítať pravidlá: ${esc(e.message)}</div>`}}
 document.querySelectorAll(".nav button").forEach(btn=>btn.addEventListener("click",()=>{document.querySelectorAll(".nav button").forEach(b=>b.classList.remove("active"));btn.classList.add("active");document.querySelectorAll(".page").forEach(p=>p.classList.add("hidden"));document.getElementById(btn.dataset.page).classList.remove("hidden");if(btn.dataset.page==="games")loadGeneric(SHEETS.games,"gamesContent");if(btn.dataset.page==="head")loadGeneric(SHEETS.head,"headContent");if(btn.dataset.page==="rules")loadRules()}));loadStandings();
