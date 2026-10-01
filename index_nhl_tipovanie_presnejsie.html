@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="sk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NHL Tipovanie 2026/27</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f3f5f8;color:#111827;font-family:Arial,Helvetica,sans-serif}
+.header{background:#101827;color:#fff;padding:18px 24px}
+.header h1{margin:0;font-size:26px;line-height:1.15}
+.header p{margin:5px 0 0;color:#cbd5e1;font-size:14px}
+.nav{background:#fff;border-bottom:1px solid #dfe3e8;padding:10px 14px;display:flex;gap:8px;flex-wrap:wrap}
+.nav button{border:1px solid #d8dde5;background:#fff;border-radius:8px;padding:9px 15px;font-weight:700;cursor:pointer;color:#111827}
+.nav button.active{background:#111827;color:#fff;border-color:#111827}
+.wrap{max-width:900px;margin:24px auto;padding:0 14px}
+.card{background:#fff;border-radius:16px;box-shadow:0 3px 16px rgba(15,23,42,.08);overflow:hidden}
+.cardhead{padding:18px 20px 12px}
+.cardhead h2{margin:0;font-size:21px}
+.cardhead .updated{margin-top:6px;color:#64748b;font-size:13px}
+.rankrow{display:grid;grid-template-columns:54px 1fr 100px;align-items:center;min-height:66px;border-top:1px solid #e5e7eb;padding:8px 20px}
+.rank{font-size:22px;font-weight:800;text-align:left}
+.rank.medal{font-size:25px}
+.player{display:flex;align-items:center;gap:13px;font-size:16px;font-weight:700}
+.logo{width:40px;height:40px;object-fit:contain;flex:none}
+.points{text-align:right;font-size:20px;font-weight:800}
+.rulesbox{padding:0 20px 18px}
+.rule{display:flex;gap:12px;align-items:center;padding:15px 0;border-top:1px solid #e5e7eb;font-weight:700}
+.rule .ico{width:28px;text-align:center}
+.tab{display:none}.tab.active{display:block}
+.tablewrap{overflow:auto;padding:0 20px 20px}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{border-bottom:1px solid #e5e7eb;padding:10px 8px;text-align:left;white-space:nowrap}
+th{background:#f8fafc;color:#475569;font-size:12px}
+.small{color:#64748b;font-size:12px}
+@media(max-width:650px){
+ .header{padding:16px}.header h1{font-size:22px}
+ .rankrow{grid-template-columns:43px 1fr 60px;padding:8px 13px}
+ .cardhead{padding:16px 14px 10px}
+ .player{font-size:14px}.logo{width:34px;height:34px}.points{font-size:18px}
+}
+</style>
+</head>
+<body>
+<header class="header">
+  <h1>🏒 NHL Tipovanie 2026/27</h1>
+  <p>Tabuľka tipovania</p>
+</header>
+
+<nav class="nav">
+  <button class="active" data-tab="poradie">🏆 Poradie</button>
+  <button data-tab="zapasy">🏒 Zápasy</button>
+  <button data-tab="pravidla">📖 Pravidlá</button>
+  <button data-tab="vzajomne">📊 Vzájomné zápasy</button>
+</nav>
+
+<main class="wrap">
+<section id="poradie" class="tab active">
+ <div class="card">
+  <div class="cardhead">
+   <h2>🏆 Poradie</h2>
+   <div class="updated" id="updated">Načítavam údaje z Google Sheets…</div>
+  </div>
+  <div id="ranking"></div>
+ </div>
+</section>
+
+<section id="zapasy" class="tab">
+ <div class="card">
+  <div class="cardhead"><h2>🏒 Zápasy</h2><div class="updated">Údaje z karty Games</div></div>
+  <div class="tablewrap" id="games">Načítavam…</div>
+ </div>
+</section>
+
+<section id="pravidla" class="tab">
+ <div class="card">
+  <div class="cardhead"><h2>📖 Pravidlá</h2></div>
+  <div class="rulesbox" id="rules">Načítavam…</div>
+ </div>
+</section>
+
+<section id="vzajomne" class="tab">
+ <div class="card">
+  <div class="cardhead"><h2>📊 Tabuľka vzájomných zápasov</h2></div>
+  <div class="tablewrap" id="matrix">Načítavam…</div>
+ </div>
+</section>
+</main>
+
+<script>
+const PUB="2PACX-1vTEW8YvbL3g9kEMJZANuADhkg_ah61vnVrg-1iCqsI_CITLiHXiw4j4uuRKT8lEyQ";
+
+const fallbackRanking=[
+ ["Trapslanders",1,"NYI"],
+ ["Traptreal",1,"MTL"],
+ ["Trappalo",1,"BUF"],
+ ["Traphilly",1,"PHI"],
+ ["Trapburgh",1,"PIT"],
+ ["Trapago",1,"CHI"],
+ ["Trabyting",1,"TBL"],
+ ["Trapers",0,"NYR"],
+ ["Traprado",0,"COL"],
+ ["Trapilers",0,"EDM"],
+ ["Trampton",0,"BOS"]
+];
+
+const logos={
+ NYR:"https://assets.nhle.com/logos/nhl/svg/NYR_light.svg",
+ NYI:"https://assets.nhle.com/logos/nhl/svg/NYI_light.svg",
+ COL:"https://assets.nhle.com/logos/nhl/svg/COL_light.svg",
+ MTL:"https://assets.nhle.com/logos/nhl/svg/MTL_light.svg",
+ BUF:"https://assets.nhle.com/logos/nhl/svg/BUF_light.svg",
+ EDM:"https://assets.nhle.com/logos/nhl/svg/EDM_light.svg",
+ PHI:"https://assets.nhle.com/logos/nhl/svg/PHI_light.svg",
+ PIT:"https://assets.nhle.com/logos/nhl/svg/PIT_light.svg",
+ CHI:"https://assets.nhle.com/logos/nhl/svg/CHI_light.svg",
+ BOS:"https://assets.nhle.com/logos/nhl/svg/BOS_light.svg",
+ TBL:"https://assets.nhle.com/logos/nhl/svg/TBL_light.svg"
+};
+
+function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+
+function renderRanking(items){
+ items.sort((a,b)=>b[1]-a[1]);
+ document.getElementById("ranking").innerHTML=items.map((x,i)=>{
+   const medal=i===0?"🥇":i===1?"🥈":i===2?"🥉":String(i+1);
+   const logo=x[2]&&logos[x[2]]?`<img class="logo" src="${logos[x[2]]}" alt="">`:"";
+   return `<div class="rankrow">
+      <div class="rank ${i<3?"medal":""}">${medal}</div>
+      <div class="player">${logo}<span>${esc(x[0])}</span></div>
+      <div class="points">${Number(x[1])||0}</div>
+   </div>`;
+ }).join("");
+}
+
+function parseGviz(text){
+ const a=text.indexOf("{"),b=text.lastIndexOf("}");
+ if(a<0||b<0) throw Error("Neplatná odpoveď Google Sheets");
+ const j=JSON.parse(text.slice(a,b+1));
+ const cols=(j.table.cols||[]).map(c=>c.label||"");
+ const rows=(j.table.rows||[]).map(r=>(r.c||[]).map(c=>c?(c.f??c.v??""):""));
+ return {cols,rows};
+}
+
+async function gviz(sheet){
+ const url=`https://docs.google.com/spreadsheets/d/e/${PUB}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(sheet)}`;
+ const r=await fetch(url,{cache:"no-store"});
+ if(!r.ok) throw Error("HTTP "+r.status);
+ return parseGviz(await r.text());
+}
+
+function col(cols,patterns){
+ const low=cols.map(x=>String(x).toLowerCase());
+ for(const p of patterns){const i=low.findIndex(x=>x.includes(p));if(i>=0)return i}
+ return -1;
+}
+
+async function loadRanking(){
+ try{
+  const d=await gviz("Tabuľka tipovania");
+  let nc=col(d.cols,["tipujúci","tipujuci","meno","team","tím"]);
+  let pc=col(d.cols,["body","points"]);
+  let items=d.rows.map(r=>[nc>=0?r[nc]:"",pc>=0?parseFloat(String(r[pc]).replace(",","."))||0:""]).filter(x=>x[0]);
+  if(items.length) renderRanking(items);
+  else renderRanking(fallbackRanking.slice());
+ }catch(e){
+  renderRanking(fallbackRanking.slice());
+ }
+ document.getElementById("updated").textContent="Aktualizované: "+new Date().toLocaleTimeString("sk-SK",{hour:"2-digit",minute:"2-digit",second:"2-digit"});
+}
+
+async function loadGames(){
+ const box=document.getElementById("games");
+ try{
+  const d=await gviz("Games");
+  const dc=col(d.cols,["dátum","datum","date"]), tc=col(d.cols,["čas","time"]);
+  const hc=col(d.cols,["domáci","domaci","home"]), ac=col(d.cols,["hostia","away"]);
+  const hgc=col(d.cols,["domáci góly","domaci goly","home goals"]), agc=col(d.cols,["hostia góly","hostia goly","away goals"]);
+  const sc=col(d.cols,["stav","status"]);
+  const rows=d.rows.filter(r=>r.some(v=>String(v).trim()!==""));
+  box.innerHTML=`<table><thead><tr><th>Dátum</th><th>Čas</th><th>Domáci</th><th>Hostia</th><th>Skóre</th><th>Stav</th></tr></thead><tbody>`+
+   rows.map(r=>`<tr><td>${esc(dc>=0?r[dc]:"")}</td><td>${esc(tc>=0?r[tc]:"")}</td><td>${esc(hc>=0?r[hc]:"")}</td><td>${esc(ac>=0?r[ac]:"")}</td><td><b>${hgc>=0&&agc>=0?esc(r[hgc])+" : "+esc(r[agc]):"—"}</b></td><td>${esc(sc>=0?r[sc]:"")}</td></tr>`).join("")+
+   `</tbody></table>`;
+ }catch(e){box.innerHTML='<div class="small">Zápasy sa momentálne nepodarilo načítať. Poradie však zostáva zobrazené.</div>'}
+}
+
+async function loadRules(){
+ const box=document.getElementById("rules");
+ try{
+  const d=await gviz("Pravidlá");
+  const rows=d.rows.filter(r=>r.some(v=>String(v).trim()!==""));
+  box.innerHTML=rows.map(r=>`<div class="rule"><span class="ico">📌</span><span>${r.filter(v=>String(v).trim()!=="").map(esc).join(" ")}</span></div>`).join("");
+ }catch(e){
+  box.innerHTML=`<div class="rule"><span class="ico">🏒</span><span>Tipovanie a bodovanie podľa pravidiel v Google Sheete.</span></div>`;
+ }
+}
+
+async function loadMatrix(){
+ const box=document.getElementById("matrix");
+ try{
+  const d=await gviz("Tabuľka vzájomných zápasov");
+  const rows=d.rows.filter(r=>r.some(v=>String(v).trim()!==""));
+  box.innerHTML=`<table><thead><tr>${d.cols.map(c=>`<th>${esc(c)}</th>`).join("")}</tr></thead><tbody>`+
+   rows.map(r=>`<tr>${d.cols.map((_,i)=>`<td>${esc(r[i]??"")}</td>`).join("")}</tr>`).join("")+
+   `</tbody></table>`;
+ }catch(e){box.innerHTML='<div class="small">Tabuľku sa momentálne nepodarilo načítať.</div>'}
+}
+
+document.querySelectorAll(".nav button").forEach(btn=>{
+ btn.onclick=()=>{
+  document.querySelectorAll(".nav button").forEach(x=>x.classList.remove("active"));
+  btn.classList.add("active");
+  document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+  document.getElementById(btn.dataset.tab).classList.add("active");
+ };
+});
+
+renderRanking(fallbackRanking.slice());
+loadRanking();loadGames();loadRules();loadMatrix();
+</script>
+</body>
+</html>
