@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="sk"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#111827">
+<title>NHL Tipovanie 2026/27</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f3f4f6;color:#111827;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+header{background:#111827;color:#fff;padding:20px 16px}h1{margin:0;font-size:22px}.sub{font-size:13px;opacity:.7;margin-top:4px}
+main{max-width:620px;margin:auto;padding:14px}.card{background:#fff;border-radius:16px;padding:15px;margin-bottom:12px;box-shadow:0 2px 8px #0000000d}
+.title{font-weight:800;font-size:17px}.updated{font-size:12px;color:#6b7280;margin-top:4px}
+.row{display:grid;grid-template-columns:42px 1fr 70px;align-items:center;gap:8px;padding:13px 2px;border-bottom:1px solid #eee}.row:last-child{border-bottom:0}
+.pos{font-size:20px;font-weight:800;text-align:center}.name{font-weight:700;font-size:16px}.pts{font-size:20px;font-weight:800;text-align:right}
+.error{color:#b91c1c;font-size:14px;line-height:1.4}
+</style></head><body>
+<header><h1>🏒 NHL Tipovanie 2026/27</h1><div class="sub">Tabuľka tipovania</div></header>
+<main><div class="card"><div class="title">🏆 Poradie</div><div id="updated" class="updated">Načítavam údaje…</div></div>
+<div id="table" class="card">Načítavam…</div></main>
+<script>
+const CSV_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vTEW8YvbL3g9kEMJZANuADhkg_ah61vnVrg-1iCqsI_CITLiHXiw4j4uuRKT8lEyQ/pub?output=csv";
+function parseCSV(text){
+ const rows=[];let row=[],cell="",quoted=false;
+ for(let i=0;i<text.length;i++){const ch=text[i],n=text[i+1];
+  if(ch=='"'&&quoted&&n=='"'){cell+='"';i++;continue}
+  if(ch=='"'){quoted=!quoted;continue}
+  if(ch==','&&!quoted){row.push(cell);cell="";continue}
+  if((ch=='\n'||ch=='\r')&&!quoted){if(ch=='\r'&&n=='\n')i++;row.push(cell);cell="";
+   if(row.some(x=>x.trim()!==''))rows.push(row);row=[];continue}
+  cell+=ch;
+ } if(cell!==''||row.length){row.push(cell);rows.push(row)} return rows;
+}
+function esc(s){return s.replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+async function load(){
+ try{
+  const res=await fetch(CSV_URL,{cache:"no-store"});
+  if(!res.ok)throw new Error("Google Sheets nevrátil údaje ("+res.status+").");
+  const rows=parseCSV(await res.text());
+  const data=rows.slice(1).map(r=>({name:(r[1]||"").trim(),points:Number((r[2]||"0").replace(",","."))||0})).filter(x=>x.name);
+  data.sort((a,b)=>b.points-a.points);
+  document.getElementById("table").innerHTML=data.map((x,i)=>{
+   const medal=i===0?"🥇":i===1?"🥈":i===2?"🥉":(i+1);
+   return `<div class="row"><div class="pos">${medal}</div><div class="name">${esc(x.name)}</div><div class="pts">${x.points}</div></div>`;
+  }).join("");
+  document.getElementById("updated").textContent="Aktualizované: "+new Date().toLocaleTimeString("sk-SK");
+ }catch(e){
+  document.getElementById("table").innerHTML='<div class="error"><b>Nepodarilo sa načítať tabuľku.</b><br>'+esc(e.message)+'</div>';
+  document.getElementById("updated").textContent="Chyba pri načítaní";
+ }
+}
+load();setInterval(load,30000);
+</script></body></html>
