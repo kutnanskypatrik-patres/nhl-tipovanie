@@ -14,6 +14,14 @@
 <section id="head" class="page hidden"><div class="card"><h2>📊 Tabuľka vzájomných zápasov</h2><div class="updated">Údaje sa načítajú priamo z Google Sheets.</div><div id="headContent" class="loading">Načítavam…</div></div></section>
 <section id="rules" class="page hidden"><div class="card"><h2>📖 Pravidlá</h2><div id="rulesContent" class="loading">Načítavam…</div></div></section>
 </main><footer>NHL RIVALITY KOVARCE · NHL 2026/27</footer>
+
+<script>
+/* Oprava log: špeciálne názvy tipujúcich -> NHL tímy */
+window.TIPPER_TEAM_LOGOS = {
+  "Trappburgh": "PIT",
+  "Trabayting": "TBL"
+};
+</script>
 <script>
 const SPREADSHEET_ID="1mi6E8lHthYRFL-BPL48FkG7vPUYCO9l_";
 const SHEETS={standings:"Tabuľka tipovania",games:"Games",head:"Tabuľka vzájomných zápasov",rules:"Pravidlá"};
@@ -57,4 +65,13 @@ async function loadStandings(){const el=document.getElementById("standingsConten
 async function loadGeneric(sheet,id){const el=document.getElementById(id);try{const t=await getSheet(sheet),h=headers(t),r=rows(t);el.innerHTML=`<div class="table-wrap"><table><thead><tr>${h.map(x=>`<th>${esc(x)}</th>`).join("")}</tr></thead><tbody>${r.filter(x=>x.some(Boolean)).map(x=>`<tr>${x.map(v=>`<td>${esc(v)}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`}catch(e){el.innerHTML=`<div class="error">Nepodarilo sa načítať Google Sheets: ${esc(e.message)}</div>`}}
 async function loadRules(){const el=document.getElementById("rulesContent");try{const t=await getSheet(SHEETS.rules),r=rows(t);el.innerHTML=r.filter(x=>x.some(Boolean)).map(x=>`<p>${x.map(esc).join(" ")}</p>`).join("")}catch(e){el.innerHTML=`<div class="error">Nepodarilo sa načítať pravidlá: ${esc(e.message)}</div>`}}
 document.querySelectorAll(".nav button").forEach(btn=>btn.addEventListener("click",()=>{document.querySelectorAll(".nav button").forEach(b=>b.classList.remove("active"));btn.classList.add("active");document.querySelectorAll(".page").forEach(p=>p.classList.add("hidden"));document.getElementById(btn.dataset.page).classList.remove("hidden");if(btn.dataset.page==="games")loadGeneric(SHEETS.games,"gamesContent");if(btn.dataset.page==="head")loadGeneric(SHEETS.head,"headContent");if(btn.dataset.page==="rules")loadRules()}));loadStandings();
-</script></body></html>
+</script>
+<script>
+(function () {
+  const extra = window.TIPPER_TEAM_LOGOS || {};
+  window.fixTipperLogo = function(name) {
+    return extra[String(name || "").trim()] || null;
+  };
+})();
+</script>
+</body></html>
