@@ -15,7 +15,7 @@
 <section id="rules" class="page hidden"><div class="card"><h2>📖 Pravidlá</h2><div id="rulesContent" class="loading">Načítavam…</div></div></section>
 </main><footer>NHL RIVALITY KOVARCE · NHL 2026/27</footer>
 <script>
-const PUBLISHED_ID="2PACX-1vTEW8YvbL3g9kEMJZANuADhkg_ah61vnVrg-1iCqsI_CITLiHXiw4j4uuRKT8lEyQ";
+const SPREADSHEET_ID="1mi6E8lHthYRFL-BPL48FkG7vPUYCO9l_";
 const SHEETS={standings:"Tabuľka tipovania",games:"Games",head:"Tabuľka vzájomných zápasov",rules:"Pravidlá"};
 let jsonpCounter=0;
 function getSheet(sheet){
@@ -27,7 +27,7 @@ function getSheet(sheet){
     window[cb]=data=>{cleanup();if(!data||!data.table)reject(new Error("Google Sheets vrátil neplatné údaje."));else resolve(data.table)};
     script.onerror=()=>{cleanup();reject(new Error("Nepodarilo sa pripojiť ku Google Sheets."))};
     const params=new URLSearchParams({sheet,tqx:`responseHandler:${cb}`});
-    script.src=`https://docs.google.com/spreadsheets/d/e/${PUBLISHED_ID}/gviz/tq?${params.toString()}`;
+    script.src=`https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?sheet=${encodeURIComponent(sheet)}&tqx=${encodeURIComponent(`responseHandler:${cb}`)}`;
     document.head.appendChild(script);
   });
 }
