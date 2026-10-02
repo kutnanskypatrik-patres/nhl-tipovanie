@@ -61,10 +61,10 @@ footer{text-align:center;color:#8190a5;padding:10px 8px;font-size:12px}
 .matrix-table{border-collapse:separate;border-spacing:0;min-width:max-content;width:100%;font-size:14px}
 .matrix-table th,.matrix-table td{border-right:1px solid #e0e5eb;border-bottom:1px solid #e0e5eb;text-align:center;white-space:nowrap}
 .matrix-table thead th{position:sticky;top:0;z-index:3;background:linear-gradient(180deg,#142943,#0b1628);color:#fff;height:86px;padding:7px 8px}
-.matrix-table thead th:first-child{left:0;z-index:5;min-width:155px;text-align:left;border-top-left-radius:10px}
+.matrix-table thead th:first-child{left:0;z-index:5;width:45px;min-width:45px;max-width:45px;padding:7px 4px;text-align:center;border-top-left-radius:10px}
 .matrix-table tbody td{height:58px;padding:6px 10px;background:#fff;font-weight:700}
 .matrix-table tbody tr:nth-child(even) td{background:#fafbfc}
-.matrix-table tbody td:first-child{position:sticky;left:0;z-index:2;text-align:left;min-width:155px;background:#fff!important;box-shadow:3px 0 7px #17243a18}
+.matrix-table tbody td:first-child{position:sticky;left:0;z-index:2;width:45px;min-width:45px;max-width:45px;padding:6px 4px;text-align:center;background:#fff!important;box-shadow:3px 0 7px #17243a18}
 .matrix-table tbody tr:last-child td:first-child{border-bottom-left-radius:10px}
 .matrix-table thead th:last-child{border-top-right-radius:10px}
 .matrix-table tbody tr:last-child td:last-child{border-bottom-right-radius:10px}
@@ -138,17 +138,17 @@ footer{text-align:center;color:#8190a5;padding:10px 8px;font-size:12px}
 
 /* Jednoduchá tabuľka vzájomných zápasov – číta presne A4:D zo Sheets */
 .head-simple-table{table-layout:auto;width:max-content;min-width:100%}
-.head-simple-table .rank-head{width:70px;min-width:70px;max-width:70px;text-align:center!important}
+.head-simple-table .rank-head{width:70px;text-align:center!important}
 .head-simple-table .logo-head{width:105px;text-align:center!important}
 .head-simple-table .team-head,.head-simple-table .sheet-head{text-align:center!important;min-width:68px}
 .head-simple-table .value-head{width:70px;text-align:center!important}
-.head-simple-table .rank-cell{width:70px;min-width:70px;max-width:70px;text-align:center;font-weight:700}
+.head-simple-table .rank-cell{width:70px;text-align:center;font-weight:700}
 .head-simple-table .logo-cell{width:105px;text-align:center}
 .head-simple-table .logo-cell .team-logo{width:42px;height:42px;margin:auto;object-fit:contain}
 .head-simple-table .team-name-cell{text-align:left;font-weight:700;white-space:normal}
 .head-simple-table .value-cell,.head-simple-table .sheet-value-cell{min-width:58px;text-align:center;font-weight:800}
 @media(max-width:650px){
- .head-simple-table .rank-head,.head-simple-table .rank-cell{width:38px;min-width:38px;max-width:38px}
+ .head-simple-table .rank-head,.head-simple-table .rank-cell{width:38px}
  .head-simple-table .logo-head,.head-simple-table .logo-cell{width:72px}
  .head-simple-table .value-head,.head-simple-table .value-cell{width:48px}
  .head-simple-table .logo-cell .team-logo{width:34px;height:34px}
