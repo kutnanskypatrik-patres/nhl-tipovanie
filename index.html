@@ -561,9 +561,9 @@ async function loadRules(){
  try{
   const t=await getSheet(SHEETS.rules),r=rows(t);
   el.innerHTML=r.filter(x=>x.some(Boolean)).map(x=>{
-   const text=x.map(esc).join(" ");
-   const raw=x.join(" ").trim().toLowerCase();
-   const heading=raw.includes("pravidl") || raw.includes("playoff") || raw.includes("tabuľka vzájomných zápasov") || raw.includes("tabulka vzajomnych zapasov") || raw.includes("tipovanie všetkých vzájomných zápasov") || raw.includes("tipovanie vsetkych vzajomnych zapasov");
+   const text=x.map(v=>esc(v).replace(/\*\*/g,"")).join(" ");
+   const raw=x.join(" ").trim().toLowerCase().replace(/\*\*/g,"");
+   const heading=raw.startsWith("pravidlá") || raw.startsWith("pravidla") || raw === "playoff:" || raw.startsWith("tabuľka vzájomných zápasov:") || raw.startsWith("tabulka vzajomnych zapasov:") || raw.startsWith("tipovanie všetkých vzájomných zápasov") || raw.startsWith("tipovanie vsetkych vzajomnych zapasov");
    return `<p class="${heading?'rule-heading':''}">${text}</p>`;
   }).join("");
  }catch(e){el.innerHTML=`<div class="error">Nepodarilo sa načítať pravidlá: ${esc(e.message)}</div>`}
