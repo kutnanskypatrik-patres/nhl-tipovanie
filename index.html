@@ -68,7 +68,8 @@ footer{text-align:center;color:#8190a5;padding:28px}
 .matrix-team{display:flex;align-items:center;gap:8px}
 .matrix-team .team-logo{width:38px;height:38px}
 .matrix-header-team{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-width:65px}
-.matrix-header-team .team-logo{width:43px;height:43px}
+.matrix-header-team .team-logo{width:43px;height:43px;object-fit:contain;display:block}
+.matrix-team .team-logo{object-fit:contain;display:block}
 .matrix-cell{min-width:65px}
 .matrix-cell.diag{background:#eef1f4!important;color:#9aa5b2}
 .matrix-cell.win{font-weight:800}
@@ -176,6 +177,21 @@ const TEAM_LOGOS={
  "Trampton":"logos/bos.png"
 };
 
+const TEAM_LOGO_ALIASES={
+ "Pittsburgh Penguins":"logos/pit.png",
+ "Boston Bruins":"logos/bos.png",
+ "New York Rangers":"logos/nyr.png",
+ "New York Islanders":"logos/nyi.png",
+ "Colorado Avalanche":"logos/col.png",
+ "Montréal Canadiens":"logos/mtl.png",
+ "Montreal Canadiens":"logos/mtl.png",
+ "Buffalo Sabres":"logos/buf.png",
+ "Edmonton Oilers":"logos/edm.png",
+ "Chicago Blackhawks":"logos/chi.png",
+ "Tampa Bay Lightning":"logos/tbl.png",
+ "Philadelphia Flyers":"logos/phi.png"
+};
+
 const TEAM_NAMES={
  "Trapslanders":"Islanders",
  "Traptreal":"Canadiens",
@@ -209,7 +225,10 @@ function rows(t){return t.rows.map(r=>r.c.map(c=>c&&c.v!=null?c.v:""))}
 function headers(t){return t.cols.map(c=>c.label||c.id||"")}
 function clean(v){return String(v??"").replace(/\u00A0/g," ").replace(/\s+/g," ").trim()}
 function esc(v){return String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]))}
-function logoFor(v){return TEAM_LOGOS[clean(v)]||""}
+function logoFor(v){
+ const key=clean(v);
+ return TEAM_LOGOS[key]||TEAM_LOGO_ALIASES[key]||"";
+}
 function shortName(v){return TEAM_NAMES[clean(v)]||clean(v)}
 
 function logoHtml(team,cls="team-logo"){
@@ -274,7 +293,7 @@ async function loadHeadToHead(){
    if(c===0){
     html+=`<th>Tím</th>`;
    }else{
-    html+=`<th><div class="matrix-header-team">${logoHtml(v)}<span>${esc(shortName(v))}</span></div></th>`;
+    html+=`<th><div class="matrix-header-team">${logoHtml(v)}<span>${esc(clean(v))}</span></div></th>`;
    }
   }
 
@@ -282,7 +301,7 @@ async function loadHeadToHead(){
 
   data.forEach((row,ri)=>{
    const team=clean(row[0]||"");
-   html+=`<tr><td><div class="matrix-team">${logoHtml(team)}<span>${esc(shortName(team))}</span></div></td>`;
+   html+=`<tr><td><div class="matrix-team">${logoHtml(team)}<span>${esc(clean(team))}</span></div></td>`;
    for(let c=1;c<width;c++){
     const value=row[c]??"";
     const headerTeam=clean(head[c]||"");
