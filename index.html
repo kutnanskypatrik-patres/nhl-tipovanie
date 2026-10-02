@@ -96,16 +96,16 @@ footer{text-align:center;color:#8190a5;padding:28px}
 
 
 /* Jednoduchá tabuľka vzájomných zápasov – číta presne A4:D zo Sheets */
-.head-simple-table{table-layout:fixed;width:100%;min-width:0}
+.head-simple-table{table-layout:auto;width:max-content;min-width:100%}
 .head-simple-table .rank-head{width:70px;text-align:center!important}
 .head-simple-table .logo-head{width:105px;text-align:center!important}
-.head-simple-table .team-head{text-align:left!important}
+.head-simple-table .team-head,.head-simple-table .sheet-head{text-align:center!important;min-width:68px}
 .head-simple-table .value-head{width:70px;text-align:center!important}
 .head-simple-table .rank-cell{width:70px;text-align:center;font-weight:700}
 .head-simple-table .logo-cell{width:105px;text-align:center}
 .head-simple-table .logo-cell .team-logo{width:42px;height:42px;margin:auto;object-fit:contain}
 .head-simple-table .team-name-cell{text-align:left;font-weight:700;white-space:normal}
-.head-simple-table .value-cell{width:70px;text-align:center;font-weight:800}
+.head-simple-table .value-cell,.head-simple-table .sheet-value-cell{min-width:58px;text-align:center;font-weight:800}
 @media(max-width:650px){
  .head-simple-table .rank-head,.head-simple-table .rank-cell{width:38px}
  .head-simple-table .logo-head,.head-simple-table .logo-cell{width:72px}
@@ -273,23 +273,15 @@ async function loadStandings(){
 
 /*
   VZÁJOMNÉ ZÁPASY:
-  Prvý riadok Google Sheets sa použije ako hlavička tímov.
-  Prvý stĺpec sa použije ako názov tímu.
-  Ostatné bunky zostanú presne podľa Google Sheets.
+  Z Google Sheets načítame všetky stĺpce od Tím až po Body.
+  Medzi # a Tím vložíme logo z priečinka logos/.
 */
 async function loadHeadToHead(){
   const el=document.getElementById("headContent");
   try{
-    /*
-      Načítame celý hárok Google Sheets bez pevného rozsahu.
-      Z neho potom vyberieme iba údaje pre zobrazenú tabuľku:
-      # | Logo | Tím | Z
-
-      Toto je zámerne odolnejšie voči zmenám v Google Sheets.
-      Ak sa pridajú ďalšie stĺpce, načítanie tabuľky sa nerozbije.
-    */
     const t=await getSheet(SHEETS.head);
     const allRows=rows(t);
+    const sheetHeaders=headers(t);
 
     const knownTeams=[
       "Pittsburgh Penguins","Boston Bruins","New York Rangers",
@@ -303,10 +295,7 @@ async function loadHeadToHead(){
       return knownTeams.some(n=>n.toLowerCase()===s) || !!logoFor(v);
     };
 
-    /*
-      Nájdeme stĺpec s názvami tímov podľa skutočných údajov.
-      Pri aktuálnom Sheete je to stĺpec C.
-    */
+    // Nájdeme stĺpec Tím podľa skutočných údajov v Google Sheets.
     let teamCol=-1;
     outer:
     for(const row of allRows){
@@ -317,46 +306,74 @@ async function loadHeadToHead(){
         }
       }
     }
-
-    if(teamCol<0){
-      throw new Error("V Google Sheets sa nepodarilo nájsť stĺpec s názvami tímov.");
-    }
+    if(teamCol<0) throw new Error("V Google Sheets sa nepodarilo nájsť stĺpec s názvami tímov.");
 
     const rankCol=Math.max(0,teamCol-2);
-    const valueCol=teamCol+1;
 
-    const data=allRows.map((row,i)=>({
-      sourceIndex:i,
-      rank:clean(row[rankCol]??""),
-      team:clean(row[teamCol]??""),
-      value:clean(row[valueCol]??"")
-    })).filter(x=>{
-      if(!x.team || !isTeam(x.team)) return false;
-      return !x.team.toLowerCase().includes("bodovanie");
-    });
+    // Nájdeme posledný stĺpec, ktorý chceme zobraziť: až po Body.
+    // Ak sa hlavička Body nenájde, použije sa posledný stĺpec s údajmi.
+    const normHeader=v=>clean(v).toLowerCase().replace(/\s+/g," ");
+    let bodyCol=-1;
+    for(let c=teamCol;c<sheetHeaders.length;c++){
+      if(normHeader(sheetHeaders[c])==="body" || normHeader(sheetHeaders[c]).startsWith("body")){
+        bodyCol=c;
+        break;
+      }
+    }
+    if(bodyCol<0){
+      for(let c=sheetHeaders.length-1;c>=teamCol;c--){
+        if(sheetHeaders[c] || allRows.some(r=>clean(r[c]??"")!=="")){ bodyCol=c; break; }
+      }
+    }
+    if(bodyCol<teamCol) bodyCol=teamCol;
+
+    // Tím musí byť prvý zo zdrojových stĺpcov, potom všetky ďalšie až po Body.
+    const sourceCols=[];
+    for(let c=teamCol;c<=bodyCol;c++){
+      sourceCols.push({index:c,label:clean(sheetHeaders[c]||"")});
+    }
+
+    const data=allRows.map((row,i)=>{
+      const team=clean(row[teamCol]??"");
+      return {
+        sourceIndex:i,
+        rank:clean(row[rankCol]??""),
+        team,
+        values:sourceCols.map(col=>clean(row[col.index]??""))
+      };
+    }).filter(x=>x.team && isTeam(x.team) && !x.team.toLowerCase().includes("bodovanie"));
 
     if(!data.length){
       el.innerHTML="<div class='error'>Tabuľka vzájomných zápasov je v Google Sheets prázdna.</div>";
       return;
     }
 
+    // Hlavičky: # | Logo | Tím | Z | ... | Body
     let html=`<div class="matrix-wrap"><table class="matrix-table head-simple-table">
       <thead><tr>
         <th class="rank-head">#</th>
-        <th class="logo-head">Logo</th>
-        <th class="team-head">Tím</th>
-        <th class="value-head">Z</th>
-      </tr></thead><tbody>`;
+        <th class="logo-head">Logo</th>`;
+
+    sourceCols.forEach((col,i)=>{
+      let label=col.label;
+      if(!label) label=i===0?"Tím":"";
+      html+=`<th class="sheet-head">${esc(label)}</th>`;
+    });
+
+    html+=`</tr></thead><tbody>`;
 
     data.forEach((x,i)=>{
       const rank=Number(String(x.rank).replace(",", "."))||i+1;
-      const display=x.value===""?"—":esc(x.value);
       html+=`<tr>
         <td class="rank-cell">${rank}</td>
-        <td class="logo-cell">${logoHtml(x.team,"team-logo")}</td>
-        <td class="team-name-cell">${esc(x.team)}</td>
-        <td class="value-cell">${display}</td>
-      </tr>`;
+        <td class="logo-cell">${logoHtml(x.team,"team-logo")}</td>`;
+      x.values.forEach((value,j)=>{
+        const colIndex=sourceCols[j].index;
+        const cls=j===0?"team-name-cell":"sheet-value-cell";
+        const display=value===""?"—":esc(value);
+        html+=`<td class="${cls}" data-col="${colIndex}">${display}</td>`;
+      });
+      html+=`</tr>`;
     });
 
     html+=`</tbody></table></div>
