@@ -76,29 +76,6 @@ footer{text-align:center;color:#8190a5;padding:28px}
 .matrix-empty{color:#aab3bf}
 .matrix-score{font-size:15px}
 
-/* Jednoduchá tabuľka vzájomných zápasov z Google Sheets */
-.h2h-simple-table{width:100%;border-collapse:separate;border-spacing:0;font-size:16px;overflow:hidden;border-radius:12px}
-.h2h-simple-table th{background:linear-gradient(180deg,#142943,#0b1628);color:#fff;padding:14px 12px;text-align:center;font-weight:700;border-right:1px solid #dfe4ea}
-.h2h-simple-table th:first-child{text-align:left}
-.h2h-simple-table th:nth-child(2){width:82px}
-.h2h-simple-table th:last-child{width:65px;border-right:0}
-.h2h-simple-table td{height:58px;padding:8px 12px;background:#fff;border-right:1px solid #e0e5eb;border-bottom:1px solid #e0e5eb;font-weight:700;color:#728096}
-.h2h-simple-table tbody tr:nth-child(even) td{background:#fafbfc}
-.h2h-simple-table td:first-child{text-align:center;width:70px}
-.h2h-simple-table td:nth-child(2){text-align:center;width:82px}
-.h2h-simple-table td:nth-child(3){text-align:left;color:#728096}
-.h2h-simple-table td:last-child{text-align:center;border-right:0;color:#728096}
-.h2h-logo{width:40px;height:40px;object-fit:contain;display:inline-block;vertical-align:middle}
-.h2h-logo.missing{width:40px;height:40px}
-@media(max-width:650px){
- .h2h-simple-table{font-size:13px}
- .h2h-simple-table th{padding:11px 8px}
- .h2h-simple-table th:nth-child(2),.h2h-simple-table td:nth-child(2){width:62px}
- .h2h-simple-table th:last-child,.h2h-simple-table td:last-child{width:45px}
- .h2h-simple-table td{height:58px;padding:7px 8px}
- .h2h-logo{width:36px;height:36px}.h2h-logo.missing{width:36px;height:36px}
-}
-
 .scoring-note{
   margin-top:16px;
   text-align:left;
@@ -116,6 +93,26 @@ footer{text-align:center;color:#8190a5;padding:28px}
 .generic-table th{background:var(--navy);color:#fff;padding:10px;text-align:left}
 .generic-table td{background:#fff;border-bottom:1px solid #e4e7eb;padding:9px}
 .generic-table tr:nth-child(even) td{background:#fafbfc}
+
+
+/* Jednoduchá tabuľka vzájomných zápasov – číta presne A4:D zo Sheets */
+.head-simple-table{table-layout:fixed;width:100%;min-width:0}
+.head-simple-table .rank-head{width:70px;text-align:center!important}
+.head-simple-table .logo-head{width:105px;text-align:center!important}
+.head-simple-table .team-head{text-align:left!important}
+.head-simple-table .value-head{width:70px;text-align:center!important}
+.head-simple-table .rank-cell{width:70px;text-align:center;font-weight:700}
+.head-simple-table .logo-cell{width:105px;text-align:center}
+.head-simple-table .logo-cell .team-logo{width:42px;height:42px;margin:auto;object-fit:contain}
+.head-simple-table .team-name-cell{text-align:left;font-weight:700;white-space:normal}
+.head-simple-table .value-cell{width:70px;text-align:center;font-weight:800}
+@media(max-width:650px){
+ .head-simple-table .rank-head,.head-simple-table .rank-cell{width:38px}
+ .head-simple-table .logo-head,.head-simple-table .logo-cell{width:72px}
+ .head-simple-table .value-head,.head-simple-table .value-cell{width:48px}
+ .head-simple-table .logo-cell .team-logo{width:34px;height:34px}
+ .head-simple-table .team-name-cell{font-size:13px;line-height:1.2}
+}
 
 @media(max-width:650px){
  .hero{min-height:82px;padding:10px 14px;gap:10px}.nhl-badge{width:48px;height:58px}.nhl-badge img{width:46px;height:54px}
@@ -283,89 +280,53 @@ async function loadStandings(){
 async function loadHeadToHead(){
  const el=document.getElementById("headContent");
  try{
-  const t=await getSheet(SHEETS.head),h=headers(t),allRows=rows(t);
-  // Zo samotnej tabuľky odstránime riadky Bodovanie/V/P/VP/PP,
-  // pretože bodovanie zobrazujeme samostatne pod tabuľkou.
-  const r=allRows.filter(x=>{
-   if(!x.some(Boolean)) return false;
-   const text=x.map(v=>clean(v)).join(" ").toLowerCase();
-   return !text.includes("bodovanie:")
-    && !text.includes("výhra v riadnom hracom čase")
-    && !text.includes("prehra v riadnom hracom čase")
-    && !text.includes("výhra po predĺžení")
-    && !text.includes("prehra po predĺžení");
+  // V Google Sheets je skutočná tabuľka vzájomných zápasov v A4:D.
+  // A = poradie, B = pôvodný/logo stĺpec (nepoužívame), C = názov tímu, D = body/zápasy.
+  // Hlavičku vytvárame pevne, aby text z horných riadkov Sheets nerozbil tabuľku.
+  const t=await getSheet(SHEETS.head,"A4:D");
+  const r=rows(t)
+    .filter(x=>x.some(Boolean))
+    .map(x=>({
+      rank:clean(x[0]||""),
+      team:clean(x[2]||""),
+      value:clean(x[3]??"")
+    }))
+    .filter(x=>x.team && !/^bodovanie:?$/i.test(x.team));
+
+  // Odstránime prípadné riadky bodovania, ktoré môžu byť ešte pod tabuľkou.
+  const data=r.filter(x=>{
+    const text=x.team.toLowerCase();
+    return !text.includes("výhra v riadnom hracom čase")
+      && !text.includes("prehra v riadnom hracom čase")
+      && !text.includes("výhra po predĺžení")
+      && !text.includes("prehra po predĺžení")
+      && !text.includes("bodovanie");
   });
-  if(!r.length){el.innerHTML="<div class='error'>Tabuľka vzájomných zápasov je v Google Sheets prázdna.</div>";return}
 
-  let head=h.slice();
-  let data=r.slice();
-
-  // Google Sheets môže vrátiť hlavičky ako A/B/C/D. Vtedy použijeme prvý riadok dát.
-  const looksGeneric=head.every((v,i)=>!v||v===String.fromCharCode(65+i));
-  if(looksGeneric && data.length){head=data.shift()}
-
-  // Aktuálny formát Google Sheets je: poradie | Logo | Tím | Z.
-  // Logo sa NENAČÍTA z Google Sheets. Vložíme ho priamo z priečinka logos/*.png.
-  const isSimpleLogoTable = head.length >= 4
-    && clean(head[1]).toLowerCase()==="logo"
-    && clean(head[2]).toLowerCase()==="tím";
-
-  if(isSimpleLogoTable){
-   let html=`<div class="matrix-wrap"><table class="h2h-simple-table"><thead><tr>`;
-   html+=`<th>#</th>`;
-   html+=`<th>Logo</th>`;
-   html+=`<th>${esc(clean(head[2]||"Tím"))}</th>`;
-   html+=`<th>${esc(clean(head[3]||"Z"))}</th>`;
-   html+=`</tr></thead><tbody>`;
-
-   data.forEach(row=>{
-    const rank=clean(row[0]||"");
-    const team=clean(row[2]||"");
-    const score=clean(row[3]||"");
-    const src=logoFor(team);
-    const logo=src
-      ? `<img class="h2h-logo" src="${src}" alt="${esc(team)}" loading="eager" onerror="this.outerHTML='<span class=&quot;h2h-logo missing&quot;>—</span>'">`
-      : `<span class="h2h-logo missing">—</span>`;
-    html+=`<tr><td>${esc(rank)}</td><td>${logo}</td><td>${esc(team)}</td><td>${score===""?"—":esc(score)}</td></tr>`;
-   });
-
-   html+=`</tbody></table></div>
-    <div class="scoring-note">
-      <div class="scoring-title">Bodovanie:</div>
-      <div>Výhra v riadnom hracom čase (V) – <strong>2b</strong></div>
-      <div>Prehra v riadnom hracom čase (P) – <strong>0b</strong></div>
-      <div>Výhra po predĺžení (VP) – <strong>2b</strong></div>
-      <div>Prehra po predĺžení (PP) – <strong>1b</strong></div>
-    </div>`;
-   el.innerHTML=html;
-   return;
+  if(!data.length){
+    el.innerHTML="<div class='error'>Tabuľka vzájomných zápasov je v Google Sheets prázdna.</div>";
+    return;
   }
 
-  // Záložný režim pre starú maticu, aby sa zachovala kompatibilita.
-  const width=Math.min(12,Math.max(head.length,...data.map(x=>x.length)));
-  let html=`<div class="matrix-wrap"><table class="matrix-table"><thead><tr>`;
-  for(let c=0;c<width;c++){
-   const v=clean(head[c]||"");
-   if(c===0){
-    html+=`<th>Tím</th>`;
-   }else{
-    html+=`<th><div class="matrix-header-team">${logoHtml(v)}<span>${esc(v)}</span></div></th>`;
-   }
-  }
-  html+=`</tr></thead><tbody>`;
-  data.forEach(row=>{
-   const team=clean(row[0]||"");
-   html+=`<tr><td><div class="matrix-team">${logoHtml(team)}<span>${esc(team)}</span></div></td>`;
-   for(let c=1;c<width;c++){
-    const value=row[c]??"";
-    const headerTeam=clean(head[c]||"");
-    const diag=team && headerTeam && team===headerTeam;
-    const cls="matrix-cell"+(diag?" diag":"");
-    const display=value===""?"—":esc(value);
-    html+=`<td class="${cls}">${display}</td>`;
-   }
-   html+=`</tr>`;
+  let html=`<div class="matrix-wrap"><table class="matrix-table head-simple-table">
+    <thead><tr>
+      <th class="rank-head">#</th>
+      <th class="logo-head">Logo</th>
+      <th class="team-head">Tím</th>
+      <th class="value-head">Z</th>
+    </tr></thead><tbody>`;
+
+  data.forEach((x,i)=>{
+    const rank=Number(x.rank)||i+1;
+    const display=x.value===""?"—":esc(x.value);
+    html+=`<tr>
+      <td class="rank-cell">${rank}</td>
+      <td class="logo-cell">${logoHtml(x.team,"team-logo")}</td>
+      <td class="team-name-cell">${esc(x.team)}</td>
+      <td class="value-cell">${display}</td>
+    </tr>`;
   });
+
   html+=`</tbody></table></div>
     <div class="scoring-note">
       <div class="scoring-title">Bodovanie:</div>
@@ -375,9 +336,10 @@ async function loadHeadToHead(){
       <div>Prehra po predĺžení (PP) – <strong>1b</strong></div>
     </div>`;
   el.innerHTML=html;
- }catch(e){el.innerHTML=`<div class="error">Nepodarilo sa načítať Google Sheets: ${esc(e.message)}</div>`}
+ }catch(e){
+  el.innerHTML=`<div class="error">Nepodarilo sa načítať Google Sheets: ${esc(e.message)}</div>`;
+ }
 }
-
 async function loadGeneric(sheet,id){
  const el=document.getElementById(id);
  try{
