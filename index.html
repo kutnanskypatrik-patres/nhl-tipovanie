@@ -241,7 +241,18 @@ async function loadStandings(){
 async function loadHeadToHead(){
  const el=document.getElementById("headContent");
  try{
-  const t=await getSheet(SHEETS.head),h=headers(t),r=rows(t).filter(x=>x.some(Boolean));
+  const t=await getSheet(SHEETS.head),h=headers(t),allRows=rows(t);
+  // Zo samotnej tabuľky odstránime riadky Bodovanie/V/ P/VP/PP,
+  // pretože bodovanie zobrazujeme samostatne pod tabuľkou.
+  const r=allRows.filter(x=>{
+    if(!x.some(Boolean)) return false;
+    const text=x.map(v=>clean(v)).join(" ").toLowerCase();
+    return !text.includes("bodovanie:")
+      && !text.includes("výhra v riadnom hracom čase")
+      && !text.includes("prehra v riadnom hracom čase")
+      && !text.includes("výhra po predĺžení")
+      && !text.includes("prehra po predĺžení");
+  });
   if(!r.length){el.innerHTML="<div class='error'>Tabuľka vzájomných zápasov je v Google Sheets prázdna.</div>";return}
 
   let head=h.slice();
