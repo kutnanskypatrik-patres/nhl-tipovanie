@@ -476,6 +476,21 @@ function formatGameDate(v){
  if(!d || isNaN(d)) return clean(v);
  return `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()}`;
 }
+function formatGameTime(v){
+ const s=clean(v);
+ if(!s)return '';
+ // Google Sheets môže vrátiť čas ako Date(1899,11,30,h,m,s).
+ const gm=s.match(/^Date\(\d{4},\d{1,2},\d{1,2},(\d{1,2}),(\d{1,2})/);
+ if(gm){
+   return `${String(Number(gm[1])).padStart(2,'0')}:${String(Number(gm[2])).padStart(2,'0')} hod`;
+ }
+ // Ak je čas už napr. 2:00 alebo 02:00, iba ho upravíme na HH:MM hod.
+ const tm=s.match(/^(\d{1,2}):(\d{1,2})/);
+ if(tm){
+   return `${String(Number(tm[1])).padStart(2,'0')}:${String(Number(tm[2])).padStart(2,'0')} hod`;
+ }
+ return s;
+}
 function gameStatus(rawStatus, homeGoals, awayGoals, date){
  const s=normalizeHeader(rawStatus);
  if(s.includes('odohran')||s.includes('played')||s.includes('finished')||s.includes('final'))return 'played';
@@ -492,7 +507,7 @@ function renderGames(){
    const statusText=g.rawStatus || (g.status==='played'?'Odohrané':g.status==='live'?'Prebieha':'Nehrané');
    const statusClass=g.status==='played'?'played':g.status==='live'?'live':'unplayed';
    const score=(g.homeGoals!==''||g.awayGoals!=='')?`${esc(g.homeGoals)} : ${esc(g.awayGoals)}`:'- : -';
-   return `<tr><td class="date">${esc(formatGameDate(g.dateObj||g.date))}</td><td class="time">${esc(g.time)}</td><td><div class="game-team home"><span>${esc(teamShort(g.home))}</span>${logoHtml(g.home,'game-team-logo')}</div></td><td><div class="game-team away">${logoHtml(g.away,'game-team-logo')}<span>${esc(teamShort(g.away))}</span></div></td><td class="game-score">${score}</td><td><span class="game-status ${statusClass}">${esc(statusText)}</span></td></tr>`;
+   return `<tr><td class="date">${esc(formatGameDate(g.dateObj||g.date))}</td><td class="time">${esc(formatGameTime(g.time))}</td><td><div class="game-team home"><span>${esc(teamShort(g.home))}</span>${logoHtml(g.home,'game-team-logo')}</div></td><td><div class="game-team away">${logoHtml(g.away,'game-team-logo')}<span>${esc(teamShort(g.away))}</span></div></td><td class="game-score">${score}</td><td><span class="game-status ${statusClass}">${esc(statusText)}</span></td></tr>`;
  }).join('')}</tbody></table></div>`;
 }
 
