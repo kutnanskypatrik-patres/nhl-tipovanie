@@ -68,8 +68,8 @@ footer{text-align:center;color:#8190a5;padding:28px}
 .matrix-team{display:flex;align-items:center;gap:8px}
 .matrix-team .team-logo{width:38px;height:38px}
 .matrix-header-team{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-width:65px}
-.matrix-header-team .team-logo{width:43px;height:43px;object-fit:contain;display:block}
-.matrix-team .team-logo{object-fit:contain;display:block}
+.matrix-header-team .team-logo{width:43px;height:43px;object-fit:contain;display:block;flex:none}
+.matrix-team .team-logo{object-fit:contain;display:block;flex:none}
 .matrix-cell{min-width:65px}
 .matrix-cell.diag{background:#eef1f4!important;color:#9aa5b2}
 .matrix-cell.win{font-weight:800}
@@ -227,13 +227,34 @@ function clean(v){return String(v??"").replace(/\u00A0/g," ").replace(/\s+/g," "
 function esc(v){return String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]))}
 function logoFor(v){
  const key=clean(v);
- return TEAM_LOGOS[key]||TEAM_LOGO_ALIASES[key]||"";
+ const normalized=key
+  .normalize("NFD")
+  .replace(/[\u0300-\u036f]/g,"")
+  .toLowerCase()
+  .replace(/[^a-z0-9]+/g," ")
+  .trim();
+
+ const normalizedAliases={
+  "pittsburgh penguins":"logos/pit.png",
+  "boston bruins":"logos/bos.png",
+  "new york rangers":"logos/nyr.png",
+  "new york islanders":"logos/nyi.png",
+  "colorado avalanche":"logos/col.png",
+  "montreal canadiens":"logos/mtl.png",
+  "buffalo sabres":"logos/buf.png",
+  "edmonton oilers":"logos/edm.png",
+  "chicago blackhawks":"logos/chi.png",
+  "tampa bay lightning":"logos/tbl.png",
+  "philadelphia flyers":"logos/phi.png"
+ };
+
+ return TEAM_LOGOS[key]||TEAM_LOGO_ALIASES[key]||normalizedAliases[normalized]||"";
 }
 function shortName(v){return TEAM_NAMES[clean(v)]||clean(v)}
 
 function logoHtml(team,cls="team-logo"){
  const src=logoFor(team);
- return src?`<img class="${cls}" src="${src}" alt="${esc(team)}" loading="eager" onerror="this.style.display='none'">`:"";
+ return src?`<img class="${cls}" src="${src}?v=2" alt="${esc(team)}" loading="eager" width="43" height="43" onerror="this.style.display='none'">`:"";
 }
 
 async function loadStandings(){
