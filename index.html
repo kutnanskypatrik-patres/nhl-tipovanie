@@ -75,6 +75,19 @@ footer{text-align:center;color:#8190a5;padding:28px}
 .matrix-empty{color:#aab3bf}
 .matrix-score{font-size:15px}
 
+.scoring-note{
+  margin-top:16px;
+  text-align:left;
+  font-size:14px;
+  line-height:1.7;
+  color:#122033;
+}
+.scoring-title{
+  font-weight:800;
+  margin-bottom:3px;
+}
+.scoring-note strong{font-weight:800}
+
 .generic-table{border-collapse:collapse;width:100%;font-size:14px}
 .generic-table th{background:var(--navy);color:#fff;padding:10px;text-align:left}
 .generic-table td{background:#fff;border-bottom:1px solid #e4e7eb;padding:9px}
@@ -270,7 +283,14 @@ async function loadHeadToHead(){
    html+=`</tr>`;
   });
 
-  html+=`</tbody></table></div>`;
+  html+=`</tbody></table></div>
+    <div class="scoring-note">
+      <div class="scoring-title">Bodovanie:</div>
+      <div>Výhra v riadnom hracom čase (V) – <strong>2b</strong></div>
+      <div>Prehra v riadnom hracom čase (P) – <strong>0b</strong></div>
+      <div>Výhra po predĺžení (VP) – <strong>2b</strong></div>
+      <div>Prehra po predĺžení (PP) – <strong>1b</strong></div>
+    </div>`;
   el.innerHTML=html;
  }catch(e){el.innerHTML=`<div class="error">Nepodarilo sa načítať Google Sheets: ${esc(e.message)}</div>`}
 }
