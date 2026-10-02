@@ -238,7 +238,10 @@ async function loadHeadToHead(){
   const looksGeneric=head.every((v,i)=>!v||v===String.fromCharCode(65+i));
   if(looksGeneric && data.length){head=data.shift()}
 
-  const width=Math.max(head.length,...data.map(x=>x.length));
+  const width=Math.min(
+    12,
+    Math.max(head.length,...data.map(x=>x.length))
+  );
 
   let html=`<div class="matrix-wrap"><table class="matrix-table"><thead><tr>`;
 
