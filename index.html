@@ -579,7 +579,7 @@ async function loadRules(){
    const text=x.map(v=>esc(v).replace(/\*\*/g,"")).join(" ");
    const raw=x.join(" ").trim().toLowerCase().replace(/\*\*/g,"");
    if(raw === "pravidlá" || raw === "pravidla") return "";
-   const heading=raw === "sezóna" || raw === "sezona" || raw === "playoff:" || raw.startsWith("tabuľka vzájomných zápasov:") || raw.startsWith("tabulka vzajomnych zapasov:") || raw.startsWith("tipovanie všetkých vzájomných zápasov") || raw.startsWith("tipovanie vsetkych vzajomnych zapasov");
+   const heading=raw === "sezóna" || raw === "sezona" || raw === "sezóna:" || raw === "sezona:" || raw === "playoff:" || raw.startsWith("tabuľka vzájomných zápasov:") || raw.startsWith("tabulka vzajomnych zapasov:") || raw.startsWith("tipovanie všetkých vzájomných zápasov") || raw.startsWith("tipovanie vsetkych vzajomnych zapasov");
    return `<p class="${heading?'rule-heading':''}">${text}</p>`;
   }).join("");
  }catch(e){el.innerHTML=`<div class="error">Nepodarilo sa načítať pravidlá: ${esc(e.message)}</div>`}
