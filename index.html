@@ -52,6 +52,14 @@ footer{text-align:center;color:#8190a5;padding:10px 8px;font-size:12px}
 .team-cell{display:flex;align-items:center;gap:14px;font-weight:600;min-width:0}
 .team-logo{width:46px;height:46px;object-fit:contain;object-position:center;flex:none;display:block}
 .points{text-align:right;font-weight:800;font-size:18px}
+.scoring-box{margin-top:14px;background:#f7f9fb;border:1px solid #dfe4ea;border-radius:10px;overflow:hidden}
+.scoring-title{font-weight:800;font-size:17px;color:#0b1628;background:#eef3f8;border-left:5px solid #1769b5;padding:9px 12px}
+.scoring-row{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;color:#000;font-size:16px;border-top:1px solid #e3e7ec}
+.scoring-row strong{font-weight:800}
+@media(max-width:650px){
+ .scoring-title{font-size:15px;padding:8px 10px}
+ .scoring-row{font-size:14px;padding:7px 10px}
+}
 
 .standings-title{display:flex;align-items:center;gap:12px}
 .standings-title .title-icon{font-size:30px}
@@ -340,7 +348,13 @@ async function loadStandings(){
     const rank=Number(x.rank)||i+1,medal=rank===1?"🥇":rank===2?"🥈":rank===3?"🥉":rank,cls=rank===1?"top1":rank===2?"top2":rank===3?"top3":"";
     return `<tr class="${cls}"><td class="rank">${rank<=3?`<span class="medal">${medal}</span>`:rank}</td><td><div class="team-cell">${logoHtml(x.team)}<span>${esc(x.team)}</span></div></td><td class="points">${x.points}</td></tr>`;
    }).join("")
-  }</tbody></table></div>`;
+  }</tbody></table></div>
+  <div class="scoring-box">
+   <div class="scoring-title">Bodovanie:</div>
+   <div class="scoring-row"><span>Výhra</span><strong>1 bod</strong></div>
+   <div class="scoring-row"><span>Prehra</span><strong>0 bodov</strong></div>
+   <div class="scoring-row"><span>Presný výsledok</span><strong>2 body</strong></div>
+  </div>`;
   document.getElementById("standingsUpdated").textContent="Aktualizované: "+new Date().toLocaleString("sk-SK");
  }catch(e){el.innerHTML=`<div class="error">Nepodarilo sa načítať Google Sheets: ${esc(e.message)}</div>`}
 }
@@ -571,7 +585,7 @@ async function loadRules(){
    const text=x.map(v=>esc(v).replace(/\*\*/g,"")).join(" ");
    const raw=x.join(" ").trim().toLowerCase().replace(/\*\*/g,"");
    if(raw === "pravidlá" || raw === "pravidla") return "";
-   const heading=raw === "sezóna" || raw === "sezona" || raw.startsWith("sezóna:") || raw.startsWith("sezona:") || raw === "playoff:" || raw.startsWith("tabuľka vzájomných zápasov:") || raw.startsWith("tabulka vzajomnych zapasov:") || raw.startsWith("tipovanie všetkých vzájomných zápasov") || raw.startsWith("tipovanie vsetkych vzajomnych zapasov");
+   const heading=raw === "sezóna" || raw === "sezona" || raw === "playoff:" || raw.startsWith("tabuľka vzájomných zápasov:") || raw.startsWith("tabulka vzajomnych zapasov:") || raw.startsWith("tipovanie všetkých vzájomných zápasov") || raw.startsWith("tipovanie vsetkych vzajomnych zapasov");
    return `<p class="${heading?'rule-heading':''}">${text}</p>`;
   }).join("");
  }catch(e){el.innerHTML=`<div class="error">Nepodarilo sa načítať pravidlá: ${esc(e.message)}</div>`}
