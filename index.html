@@ -110,15 +110,15 @@ footer{text-align:center;color:#8190a5;padding:28px}
 
 <div class="nav-wrap">
  <nav class="nav">
-  <button class="active" data-page="standings">🏆 Tabuľka tipovania zápasov</button>
+  <button class="active" data-page="head">📊 Vzájomné zápasy</button>
+  <button data-page="standings">🏆 Tabuľka tipovania zápasov</button>
   <button data-page="games">🏒 Zápasy</button>
-  <button data-page="head">📊 Vzájomné zápasy</button>
   <button data-page="rules">📖 Pravidlá</button>
  </nav>
 </div>
 
 <main>
-<section id="standings" class="page">
+<section id="standings" class="page hidden">
  <div class="card">
   <div class="standings-title"><span class="title-icon">🏆</span><h2>NHL 2026/27 – Tabuľka tipovania zápasov</h2></div>
   <div class="standings-subtitle" id="standingsUpdated">Načítavam údaje z Google Sheets…</div>
@@ -130,7 +130,7 @@ footer{text-align:center;color:#8190a5;padding:28px}
  <div class="card"><h2>🏒 Zápasy</h2><div class="updated">Údaje sa načítajú priamo z Google Sheets.</div><div id="gamesContent" class="loading">Načítavam…</div></div>
 </section>
 
-<section id="head" class="page hidden">
+<section id="head" class="page">
  <div class="card head-card">
   <div class="head-title"><span>📊</span><h2>Tabuľka vzájomných zápasov</h2></div>
   <div class="updated">Údaje sa načítajú priamo z Google Sheets.</div>
@@ -299,6 +299,7 @@ document.querySelectorAll(".nav button").forEach(btn=>btn.addEventListener("clic
 }));
 
 loadStandings();
+loadHeadToHead();
 </script>
 </body>
 </html>
