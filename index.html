@@ -8,11 +8,11 @@
 :root{--navy:#0b1628;--bg:#f2f4f7;--text:#122033;--line:#dfe4ea}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif}
-.hero{min-height:92px;display:flex;align-items:center;gap:22px;padding:10px 5%;background:linear-gradient(110deg,#071321,#152943 52%,#071321);color:#fff;position:relative;overflow:hidden}
-.hero:after{content:"";position:absolute;left:15%;right:5%;bottom:5px;height:3px;background:linear-gradient(90deg,transparent,#e31b23,#fff,#e31b23,transparent)}
-.nhl-badge{width:64px;height:70px;display:grid;place-items:center;flex:none}
-.nhl-badge img{width:60px;height:66px;object-fit:contain;filter:drop-shadow(0 3px 6px #0008)}
-.hero h1{margin:0;font-size:clamp(26px,3.4vw,48px);font-style:italic;letter-spacing:-1px}
+.hero{min-height:118px;display:flex;align-items:center;gap:28px;padding:18px 5%;background:linear-gradient(110deg,#071321,#152943 52%,#071321);color:#fff;position:relative;overflow:hidden}
+.hero:after{content:"";position:absolute;left:15%;right:5%;bottom:8px;height:3px;background:linear-gradient(90deg,transparent,#e31b23,#fff,#e31b23,transparent)}
+.nhl-badge{width:82px;height:92px;display:grid;place-items:center;flex:none}
+.nhl-badge img{width:78px;height:88px;object-fit:contain;filter:drop-shadow(0 3px 6px #0008)}
+.hero h1{margin:0;font-size:clamp(30px,4vw,56px);font-style:italic;letter-spacing:-1px}
 .hero h1 span{display:block;width:max-content;max-width:100%;border-bottom:4px solid #e31b23;padding-bottom:3px}
 .nav-wrap{background:#fff;border-bottom:1px solid #ddd;padding:12px 4%;position:sticky;top:0;z-index:10}
 .nav{max-width:1250px;margin:auto;display:flex;gap:10px;flex-wrap:wrap}
@@ -94,9 +94,29 @@ footer{text-align:center;color:#8190a5;padding:28px}
 .generic-table td{background:#fff;border-bottom:1px solid #e4e7eb;padding:9px}
 .generic-table tr:nth-child(even) td{background:#fafbfc}
 
+
+/* Jednoduchá tabuľka vzájomných zápasov – číta presne A4:D zo Sheets */
+.head-simple-table{table-layout:auto;width:max-content;min-width:100%}
+.head-simple-table .rank-head{width:70px;min-width:70px;max-width:70px;padding-left:4px!important;padding-right:4px!important;text-align:center!important}
+.head-simple-table .logo-head{width:105px;text-align:center!important}
+.head-simple-table .team-head,.head-simple-table .sheet-head{text-align:center!important;min-width:68px}
+.head-simple-table .value-head{width:70px;text-align:center!important}
+.head-simple-table .rank-cell{width:70px;min-width:70px;max-width:70px;padding-left:4px!important;padding-right:4px!important;text-align:center;font-weight:700}
+.head-simple-table .logo-cell{width:105px;text-align:center}
+.head-simple-table .logo-cell .team-logo{width:42px;height:42px;margin:auto;object-fit:contain}
+.head-simple-table .team-name-cell{text-align:left;font-weight:700;white-space:normal}
+.head-simple-table .value-cell,.head-simple-table .sheet-value-cell{min-width:58px;text-align:center;font-weight:800}
 @media(max-width:650px){
- .hero{min-height:62px;padding:7px 14px;gap:8px}.nhl-badge{width:34px;height:42px}.nhl-badge img{width:33px;height:40px}
- .hero h1{font-size:19px}.hero h1 span{border-bottom-width:2px;padding-bottom:1px}
+ .head-simple-table .rank-head,.head-simple-table .rank-cell{width:48px;min-width:48px;padding-left:3px!important;padding-right:3px!important;text-align:center!important}
+ .head-simple-table .logo-head,.head-simple-table .logo-cell{width:72px}
+ .head-simple-table .value-head,.head-simple-table .value-cell{width:48px}
+ .head-simple-table .logo-cell .team-logo{width:34px;height:34px}
+ .head-simple-table .team-name-cell{font-size:13px;line-height:1.2}
+}
+
+@media(max-width:650px){
+ .hero{min-height:82px;padding:10px 14px;gap:10px}.nhl-badge{width:48px;height:58px}.nhl-badge img{width:46px;height:54px}
+ .hero h1{font-size:24px}.hero h1 span{border-bottom-width:3px}
  .nav-wrap{padding:7px 8px}.nav{gap:6px;flex-wrap:nowrap;overflow-x:auto;padding-bottom:2px}
  .nav button{white-space:nowrap;padding:9px 11px;font-size:12px;border-radius:8px}
  main{margin:12px auto;padding:0 8px}.card{border-radius:12px;padding:11px;margin-bottom:12px}
@@ -112,6 +132,39 @@ footer{text-align:center;color:#8190a5;padding:28px}
  .matrix-header-team{min-width:50px;gap:2px;font-size:9px}.matrix-header-team .team-logo{width:30px;height:30px}
  .matrix-team .team-logo{width:28px;height:28px}.matrix-cell{min-width:50px}.matrix-score{font-size:12px}
  footer{padding:16px 8px;font-size:11px}
+}
+</style>
+
+<style id="rank-column-final-fix">
+.head-simple-table th.rank-head,
+.head-simple-table td.rank-cell {
+  width: 70px !important;
+  min-width: 70px !important;
+  max-width: 70px !important;
+  box-sizing: border-box !important;
+  text-align: center !important;
+}
+@media (max-width: 700px) {
+  .head-simple-table th.rank-head,
+  .head-simple-table td.rank-cell {
+    width: 70px !important;
+    min-width: 70px !important;
+    max-width: 70px !important;
+  }
+}
+</style>
+
+
+<style id="hero-narrow-final">
+/* Zúžený vrchný modrý riadok – ostatná grafika a funkcie zostávajú bez zmeny */
+.hero{min-height:90px;padding:8px 5%;gap:20px}
+.nhl-badge{width:64px;height:70px}
+.nhl-badge img{width:60px;height:64px}
+@media(max-width:650px){
+  .hero{min-height:64px;padding:6px 14px;gap:8px}
+  .nhl-badge{width:42px;height:48px}
+  .nhl-badge img{width:40px;height:44px}
+  .hero h1{font-size:22px}
 }
 </style>
 </head>
@@ -253,78 +306,123 @@ async function loadStandings(){
 
 /*
   VZÁJOMNÉ ZÁPASY:
-  Prvý riadok Google Sheets sa použije ako hlavička tímov.
-  Prvý stĺpec sa použije ako názov tímu.
-  Ostatné bunky zostanú presne podľa Google Sheets.
+  Z Google Sheets načítame všetky stĺpce od Tím až po Body.
+  Medzi # a Tím vložíme logo z priečinka logos/.
 */
 async function loadHeadToHead(){
- const el=document.getElementById("headContent");
- try{
-  const t=await getSheet(SHEETS.head),h=headers(t),allRows=rows(t);
-  // Zo samotnej tabuľky odstránime riadky Bodovanie/V/ P/VP/PP,
-  // pretože bodovanie zobrazujeme samostatne pod tabuľkou.
-  const r=allRows.filter(x=>{
-    if(!x.some(Boolean)) return false;
-    const text=x.map(v=>clean(v)).join(" ").toLowerCase();
-    return !text.includes("bodovanie:")
-      && !text.includes("výhra v riadnom hracom čase")
-      && !text.includes("prehra v riadnom hracom čase")
-      && !text.includes("výhra po predĺžení")
-      && !text.includes("prehra po predĺžení");
-  });
-  if(!r.length){el.innerHTML="<div class='error'>Tabuľka vzájomných zápasov je v Google Sheets prázdna.</div>";return}
+  const el=document.getElementById("headContent");
+  try{
+    const t=await getSheet(SHEETS.head);
+    const allRows=rows(t);
+    const sheetHeaders=headers(t);
 
-  let head=h.slice();
-  let data=r.slice();
+    const knownTeams=[
+      "Pittsburgh Penguins","Boston Bruins","New York Rangers",
+      "New York Islanders","Colorado Avalanche","Montréal Canadiens",
+      "Montreal Canadiens","Buffalo Sabres","Edmonton Oilers",
+      "Chicago Blackhawks","Tampa Bay Lightning","Philadelphia Flyers"
+    ];
 
-  // Ak Google Sheets vracia prvý riadok ako dáta a hlavičky sú len A/B/C..., použijeme ho ako hlavičku.
-  const looksGeneric=head.every((v,i)=>!v||v===String.fromCharCode(65+i));
-  if(looksGeneric && data.length){head=data.shift()}
+    const isTeam=v=>{
+      const s=clean(v).toLowerCase();
+      return knownTeams.some(n=>n.toLowerCase()===s) || !!logoFor(v);
+    };
 
-  const width=Math.min(
-    12,
-    Math.max(head.length,...data.map(x=>x.length))
-  );
+    // Nájdeme stĺpec Tím podľa skutočných údajov v Google Sheets.
+    let teamCol=-1;
+    outer:
+    for(const row of allRows){
+      for(let c=0;c<row.length;c++){
+        if(isTeam(row[c])){
+          teamCol=c;
+          break outer;
+        }
+      }
+    }
+    if(teamCol<0) throw new Error("V Google Sheets sa nepodarilo nájsť stĺpec s názvami tímov.");
 
-  let html=`<div class="matrix-wrap"><table class="matrix-table"><thead><tr>`;
+    const rankCol=Math.max(0,teamCol-2);
 
-  for(let c=0;c<width;c++){
-   const v=clean(head[c]||"");
-   if(c===0){
-    html+=`<th>Tím</th>`;
-   }else{
-    html+=`<th><div class="matrix-header-team">${logoHtml(v)}<span>${esc(clean(v))}</span></div></th>`;
-   }
+    // Nájdeme posledný stĺpec, ktorý chceme zobraziť: až po Body.
+    // Ak sa hlavička Body nenájde, použije sa posledný stĺpec s údajmi.
+    const normHeader=v=>clean(v).toLowerCase().replace(/\s+/g," ");
+    let bodyCol=-1;
+    for(let c=teamCol;c<sheetHeaders.length;c++){
+      if(normHeader(sheetHeaders[c])==="body" || normHeader(sheetHeaders[c]).startsWith("body")){
+        bodyCol=c;
+        break;
+      }
+    }
+    if(bodyCol<0){
+      for(let c=sheetHeaders.length-1;c>=teamCol;c--){
+        if(sheetHeaders[c] || allRows.some(r=>clean(r[c]??"")!=="")){ bodyCol=c; break; }
+      }
+    }
+    if(bodyCol<teamCol) bodyCol=teamCol;
+
+    // Tím musí byť prvý zo zdrojových stĺpcov, potom všetky ďalšie až po Body.
+    const sourceCols=[];
+    for(let c=teamCol;c<=bodyCol;c++){
+      sourceCols.push({index:c,label:clean(sheetHeaders[c]||"")});
+    }
+
+    const data=allRows.map((row,i)=>{
+      const team=clean(row[teamCol]??"");
+      return {
+        sourceIndex:i,
+        rank:clean(row[rankCol]??""),
+        team,
+        values:sourceCols.map(col=>clean(row[col.index]??""))
+      };
+    }).filter(x=>x.team && isTeam(x.team) && !x.team.toLowerCase().includes("bodovanie"));
+
+    if(!data.length){
+      el.innerHTML="<div class='error'>Tabuľka vzájomných zápasov je v Google Sheets prázdna.</div>";
+      return;
+    }
+
+    // Hlavičky: # | Logo | Tím | Z | ... | Body
+    let html=`<div class="matrix-wrap"><table class="matrix-table head-simple-table">
+      <thead><tr>
+        <th class="rank-head">#</th>
+        <th class="logo-head">Logo</th>`;
+
+    sourceCols.forEach((col,i)=>{
+      let label=col.label;
+      if(!label) label=i===0?"Tím":"";
+      html+=`<th class="sheet-head">${esc(label)}</th>`;
+    });
+
+    html+=`</tr></thead><tbody>`;
+
+    data.forEach((x,i)=>{
+      const rank=Number(String(x.rank).replace(",", "."))||i+1;
+      html+=`<tr>
+        <td class="rank-cell">${rank}</td>
+        <td class="logo-cell">${logoHtml(x.team,"team-logo")}</td>`;
+      x.values.forEach((value,j)=>{
+        const colIndex=sourceCols[j].index;
+        const cls=j===0?"team-name-cell":"sheet-value-cell";
+        const display=value===""?"—":esc(value);
+        html+=`<td class="${cls}" data-col="${colIndex}">${display}</td>`;
+      });
+      html+=`</tr>`;
+    });
+
+    html+=`</tbody></table></div>
+      <div class="scoring-note">
+        <div class="scoring-title">Bodovanie:</div>
+        <div>Výhra v riadnom hracom čase (V) – <strong>2b</strong></div>
+        <div>Prehra v riadnom hracom čase (P) – <strong>0b</strong></div>
+        <div>Výhra po predĺžení (VP) – <strong>2b</strong></div>
+        <div>Prehra po predĺžení (PP) – <strong>1b</strong></div>
+      </div>`;
+
+    el.innerHTML=html;
+  }catch(e){
+    el.innerHTML=`<div class="error">Nepodarilo sa načítať Google Sheets: ${esc(e.message)}</div>`;
   }
-
-  html+=`</tr></thead><tbody>`;
-
-  data.forEach((row,ri)=>{
-   const team=clean(row[0]||"");
-   html+=`<tr><td><div class="matrix-team">${logoHtml(team)}<span>${esc(clean(team))}</span></div></td>`;
-   for(let c=1;c<width;c++){
-    const value=row[c]??"";
-    const headerTeam=clean(head[c]||"");
-    const diag=team && headerTeam && team===headerTeam;
-    let cls="matrix-cell"+(diag?" diag":"");
-    let display=value===""?"—":esc(value);
-    html+=`<td class="${cls}">${display}</td>`;
-   }
-   html+=`</tr>`;
-  });
-
-  html+=`</tbody></table></div>
-    <div class="scoring-note">
-      <div class="scoring-title">Bodovanie:</div>
-      <div>Výhra v riadnom hracom čase (V) – <strong>2b</strong></div>
-      <div>Prehra v riadnom hracom čase (P) – <strong>0b</strong></div>
-      <div>Výhra po predĺžení (VP) – <strong>2b</strong></div>
-      <div>Prehra po predĺžení (PP) – <strong>1b</strong></div>
-    </div>`;
-  el.innerHTML=html;
- }catch(e){el.innerHTML=`<div class="error">Nepodarilo sa načítať Google Sheets: ${esc(e.message)}</div>`}
 }
-
 async function loadGeneric(sheet,id){
  const el=document.getElementById(id);
  try{
