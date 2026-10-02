@@ -100,9 +100,6 @@ footer{text-align:center;color:#8190a5;padding:28px}
 .games-filters{display:flex;gap:8px;flex-wrap:wrap}
 .games-filter{border:1px solid #d8dee6;background:#fff;color:#17243a;border-radius:9px;padding:9px 15px;font-weight:700;font-size:14px;cursor:pointer}
 .games-filter.active{background:var(--navy);color:#fff;border-color:var(--navy)}
-.games-month{display:flex;align-items:center;gap:6px}
-.games-month button{width:38px;height:38px;border:1px solid #d8dee6;background:#fff;border-radius:9px;color:#17243a;font-size:18px;font-weight:700;cursor:pointer}
-.games-month-label{min-width:155px;height:38px;display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid #d8dee6;background:#fff;border-radius:9px;font-weight:700}
 .games-table-wrap{overflow:auto;-webkit-overflow-scrolling:touch;border-radius:10px}
 .games-table{width:100%;border-collapse:separate;border-spacing:0 2px;min-width:760px;font-size:14px}
 .games-table th{background:linear-gradient(180deg,#142943,#0b1628);color:#fff;padding:9px 10px;text-align:center;font-size:14px;white-space:nowrap}
@@ -126,7 +123,6 @@ footer{text-align:center;color:#8190a5;padding:28px}
  .games-card{padding:12px 10px 14px}
  .games-head{gap:8px;margin-bottom:10px}.games-title-icon{font-size:26px}.games-title h2{font-size:21px}.games-updated{font-size:11px}
  .games-toolbar{align-items:stretch;gap:8px}.games-filters{width:100%;overflow-x:auto;flex-wrap:nowrap;padding-bottom:2px}.games-filter{white-space:nowrap;padding:8px 11px;font-size:12px}
- .games-month{width:100%;justify-content:flex-end}.games-month-label{min-width:145px;font-size:12px}
  .games-table{min-width:720px;font-size:12px}.games-table th{font-size:12px;padding:8px}.games-table td{padding:5px 7px;height:36px}
  .game-team{min-width:125px}.game-team-logo{width:27px;height:27px}.game-score{font-size:13px}.game-status{min-width:70px;padding:4px 7px;font-size:11px}
 }
@@ -214,11 +210,6 @@ footer{text-align:center;color:#8190a5;padding:28px}
     <button class="games-filter" data-game-filter="unplayed">Nehrané</button>
     <button class="games-filter" data-game-filter="live">Prebiehajúce</button>
     <button class="games-filter" data-game-filter="played">Odohrané</button>
-   </div>
-   <div class="games-month">
-    <button type="button" id="gamesPrevMonth">‹</button>
-    <div class="games-month-label">📅 <span id="gamesMonthLabel">Október 2026</span></div>
-    <button type="button" id="gamesNextMonth">›</button>
    </div>
   </div>
   <div id="gamesContent" class="loading">Načítavam…</div>
@@ -453,7 +444,6 @@ async function loadHeadToHead(){
 }
 let gamesData=[];
 let gamesFilter='all';
-let gamesMonth=new Date(2026,9,1);
 
 function normalizeHeader(v){return clean(v).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');}
 function findCol(headersList, patterns){
@@ -489,14 +479,8 @@ function gameStatus(rawStatus, homeGoals, awayGoals, date){
 }
 function renderGames(){
  const box=document.getElementById('gamesContent');
- const monthLabel=document.getElementById('gamesMonthLabel');
- monthLabel.textContent=gamesMonth.toLocaleDateString('sk-SK',{month:'long',year:'numeric'}).replace(/^./,m=>m.toUpperCase());
- const filtered=gamesData.filter(g=>{
-   const d=g.dateObj;
-   const inMonth=!d || (d.getFullYear()===gamesMonth.getFullYear() && d.getMonth()===gamesMonth.getMonth());
-   return inMonth && (gamesFilter==='all'||g.status===gamesFilter);
- });
- if(!filtered.length){box.innerHTML='<div class="games-empty">Pre zvolený mesiac a filter nie sú v Google Sheets žiadne zápasy.</div>';return;}
+ const filtered=gamesData.filter(g=>gamesFilter==='all'||g.status===gamesFilter);
+ if(!filtered.length){box.innerHTML='<div class="games-empty">Pre zvolený filter nie sú v Google Sheets žiadne zápasy.</div>';return;}
  box.innerHTML=`<div class="games-table-wrap"><table class="games-table"><thead><tr><th>Dátum</th><th>Čas (SVK)</th><th>Domáci</th><th>Hostia</th><th>Výsledok</th><th>Stav</th></tr></thead><tbody>${filtered.map(g=>{
    const statusText=g.rawStatus || (g.status==='played'?'Odohrané':g.status==='live'?'Prebieha':'Nehrané');
    const statusClass=g.status==='played'?'played':g.status==='live'?'live':'unplayed';
@@ -549,8 +533,6 @@ document.querySelectorAll('.games-filter').forEach(btn=>btn.addEventListener('cl
  gamesFilter=btn.dataset.gameFilter;
  renderGames();
 }));
-document.getElementById('gamesPrevMonth').addEventListener('click',()=>{gamesMonth=new Date(gamesMonth.getFullYear(),gamesMonth.getMonth()-1,1);renderGames();});
-document.getElementById('gamesNextMonth').addEventListener('click',()=>{gamesMonth=new Date(gamesMonth.getFullYear(),gamesMonth.getMonth()+1,1);renderGames();});
 
 document.querySelectorAll(".nav button").forEach(btn=>btn.addEventListener("click",()=>{
  document.querySelectorAll(".nav button").forEach(b=>b.classList.remove("active"));
