@@ -138,17 +138,17 @@ footer{text-align:center;color:#8190a5;padding:10px 8px;font-size:12px}
 
 /* Jednoduchá tabuľka vzájomných zápasov – číta presne A4:D zo Sheets */
 .head-simple-table{table-layout:auto;width:max-content;min-width:100%}
-.head-simple-table .rank-head{width:70px;text-align:center!important}
+.head-simple-table .rank-head{width:70px;min-width:70px;max-width:70px;text-align:center!important}
 .head-simple-table .logo-head{width:105px;text-align:center!important}
 .head-simple-table .team-head,.head-simple-table .sheet-head{text-align:center!important;min-width:68px}
 .head-simple-table .value-head{width:70px;text-align:center!important}
-.head-simple-table .rank-cell{width:70px;text-align:center;font-weight:700}
+.head-simple-table .rank-cell{width:70px;min-width:70px;max-width:70px;text-align:center;font-weight:700}
 .head-simple-table .logo-cell{width:105px;text-align:center}
 .head-simple-table .logo-cell .team-logo{width:42px;height:42px;margin:auto;object-fit:contain}
 .head-simple-table .team-name-cell{text-align:left;font-weight:700;white-space:normal}
 .head-simple-table .value-cell,.head-simple-table .sheet-value-cell{min-width:58px;text-align:center;font-weight:800}
 @media(max-width:650px){
- .head-simple-table .rank-head,.head-simple-table .rank-cell{width:38px}
+ .head-simple-table .rank-head,.head-simple-table .rank-cell{width:38px;min-width:38px;max-width:38px}
  .head-simple-table .logo-head,.head-simple-table .logo-cell{width:72px}
  .head-simple-table .value-head,.head-simple-table .value-cell{width:48px}
  .head-simple-table .logo-cell .team-logo{width:34px;height:34px}
