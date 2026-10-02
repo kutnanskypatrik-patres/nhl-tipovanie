@@ -59,6 +59,26 @@ footer{text-align:center;color:#8190a5;padding:28px}
 .matrix-table th,.matrix-table td{border-right:1px solid #e0e5eb;border-bottom:1px solid #e0e5eb;text-align:center;white-space:nowrap}
 .matrix-table thead th{position:sticky;top:0;z-index:3;background:linear-gradient(180deg,#142943,#0b1628);color:#fff;height:86px;padding:7px 8px}
 .matrix-table thead th:first-child{left:0;z-index:5;min-width:155px;text-align:left;border-top-left-radius:10px}
+
+/* Vzájomné zápasy – jednoduchá mobilná tabuľka s lokálnymi PNG logami */
+.h2h-simple{width:100%;border-collapse:separate;border-spacing:0;table-layout:fixed}
+.h2h-simple thead th{background:linear-gradient(180deg,#142943,#0b1628);color:#fff;padding:14px 10px;text-align:left;font-size:15px}
+.h2h-simple thead th:first-child{border-radius:12px 0 0 12px;width:29%}
+.h2h-simple thead th:nth-child(2){width:16%;text-align:center}
+.h2h-simple thead th:nth-child(3){width:45%}
+.h2h-simple thead th:last-child{width:10%;text-align:center;border-radius:0 12px 12px 0}
+.h2h-simple tbody td{padding:9px 10px;background:#fff;border-bottom:1px solid #dfe4ea;height:58px;font-size:17px;color:#728096;font-weight:700}
+.h2h-simple tbody tr:nth-child(even) td{background:#fafbfc}
+.h2h-logo-cell{text-align:center}
+.h2h-logo{width:43px;height:43px;object-fit:contain;display:inline-block;vertical-align:middle}
+.h2h-team-name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.h2h-score{text-align:center}
+@media(max-width:600px){
+ .h2h-simple thead th{padding:13px 8px;font-size:14px}
+ .h2h-simple tbody td{padding:8px;height:58px;font-size:16px}
+ .h2h-logo{width:42px;height:42px}
+}
+
 .matrix-table tbody td{height:58px;padding:6px 10px;background:#fff;font-weight:700}
 .matrix-table tbody tr:nth-child(even) td{background:#fafbfc}
 .matrix-table tbody td:first-child{position:sticky;left:0;z-index:2;text-align:left;min-width:155px;background:#fff!important;box-shadow:3px 0 7px #17243a18}
@@ -298,29 +318,58 @@ async function loadHeadToHead(){
   let head=h.slice();
   let data=r.slice();
 
-  // Ak Google Sheets vracia prvý riadok ako dáta a hlavičky sú len A/B/C..., použijeme ho ako hlavičku.
+  // Ak Google Sheets vráti všeobecné hlavičky A/B/C..., prvý riadok dát použijeme ako hlavičku.
   const looksGeneric=head.every((v,i)=>!v||v===String.fromCharCode(65+i));
   if(looksGeneric && data.length){head=data.shift()}
 
-  const width=Math.min(
-    12,
-    Math.max(head.length,...data.map(x=>x.length))
-  );
+  // Špeciálny formát tvojej tabuľky: # | Logo | Tím | Z
+  // Logo sa NEčíta z Google Sheets. Vždy sa načíta z lokálneho priečinka logos/*.png
+  const normalizedHead=head.map(v=>clean(v).normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase());
+  const logoCol=normalizedHead.findIndex(v=>v==="logo" || v==="logo tímu" || v.includes("logo"));
+  const teamCols=normalizedHead.map((v,i)=>({v,i})).filter(x=>x.v==="tim" || x.v==="tím" || x.v.includes("tim"));
+  const scoreCol=normalizedHead.findIndex(v=>v==="z" || v==="body" || v==="skore" || v==="skóre");
 
-  let html=`<div class="matrix-wrap"><table class="matrix-table"><thead><tr>`;
+  if(logoCol>=0 && teamCols.length>=1){
+    // Pri tomto formáte je názov klubu zvyčajne v stĺpci „Tím“ napravo od Logo.
+    let teamCol=teamCols[teamCols.length-1].i;
+    if(teamCol===logoCol && teamCols.length>1) teamCol=teamCols[0].i;
+    const rankCol=teamCols.length>1 && teamCols[0].i!==teamCol ? teamCols[0].i : 0;
+    const actualScoreCol=scoreCol>=0?scoreCol:Math.max(0,head.length-1);
 
-  for(let c=0;c<width;c++){
-   const v=clean(head[c]||"");
-   if(c===0){
-    html+=`<th>Tím</th>`;
-   }else{
-    html+=`<th><div class="matrix-header-team">${logoHtml(v)}<span>${esc(clean(v))}</span></div></th>`;
-   }
+    let html=`<div class="matrix-wrap"><table class="matrix-table h2h-simple"><thead><tr>`
+      +`<th>Tím</th><th>Logo</th><th>Tím</th><th>Z</th>`
+      +`</tr></thead><tbody>`;
+
+    data.forEach(row=>{
+      const team=clean(row[teamCol]||"");
+      if(!team) return;
+      const rank=clean(row[rankCol]||"");
+      const score=clean(row[actualScoreCol]??"");
+      const logo=logoHtml(team,"h2h-logo");
+      html+=`<tr><td>${esc(rank)}</td><td class="h2h-logo-cell">${logo||""}</td><td class="h2h-team-name">${esc(team)}</td><td class="h2h-score">${esc(score)}</td></tr>`;
+    });
+
+    html+=`</tbody></table></div>`;
+    html+=`<div class="scoring-note">
+      <div class="scoring-title">Bodovanie:</div>
+      <div>Výhra v riadnom hracom čase (V) – <strong>2b</strong></div>
+      <div>Prehra v riadnom hracom čase (P) – <strong>0b</strong></div>
+      <div>Výhra po predĺžení (VP) – <strong>2b</strong></div>
+      <div>Prehra po predĺžení (PP) – <strong>1b</strong></div>
+    </div>`;
+    el.innerHTML=html;
+    return;
   }
 
+  const width=Math.min(12,Math.max(head.length,...data.map(x=>x.length)));
+  let html=`<div class="matrix-wrap"><table class="matrix-table"><thead><tr>`;
+  for(let c=0;c<width;c++){
+   const v=clean(head[c]||"");
+   if(c===0) html+=`<th>Tím</th>`;
+   else html+=`<th><div class="matrix-header-team">${logoHtml(v)}<span>${esc(clean(v))}</span></div></th>`;
+  }
   html+=`</tr></thead><tbody>`;
-
-  data.forEach((row,ri)=>{
+  data.forEach(row=>{
    const team=clean(row[0]||"");
    html+=`<tr><td><div class="matrix-team">${logoHtml(team)}<span>${esc(clean(team))}</span></div></td>`;
    for(let c=1;c<width;c++){
@@ -333,8 +382,7 @@ async function loadHeadToHead(){
    }
    html+=`</tr>`;
   });
-
-  html+=`</tbody></table></div>
+  html+=`</tbody></table></div>`;
     <div class="scoring-note">
       <div class="scoring-title">Bodovanie:</div>
       <div>Výhra v riadnom hracom čase (V) – <strong>2b</strong></div>
