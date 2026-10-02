@@ -182,24 +182,9 @@ footer{text-align:center;color:#8190a5;padding:10px 8px;font-size:12px}
 }
 </style>
 
-<style id="rules-subheading-fix">
-.rules-subheading {
-  font-size: 1.05rem;
-  font-weight: 800;
-  color: #123b63;
-  background: #eef6ff;
-  border-left: 4px solid #1677c8;
-  padding: 7px 10px;
-  margin: 14px 0 8px;
-  text-align: left;
-  border-radius: 3px;
-}
-@media (max-width: 600px) {
-  .rules-subheading {
-    font-size: .98rem;
-    padding: 6px 8px;
-  }
-}
+<style id="rules-subheading-style">
+.rules-subheading{font-size:1.05rem;font-weight:800;color:#123b63;background:#eef6ff;border-left:4px solid #1677c8;padding:7px 10px;margin:14px 0 8px;text-align:left;border-radius:3px}
+@media(max-width:600px){.rules-subheading{font-size:.98rem;padding:6px 8px}}
 </style>
 
 </head>
@@ -585,9 +570,9 @@ async function loadRules(){
   el.innerHTML=r.filter(x=>x.some(Boolean)).map(x=>{
    const text=x.map(v=>esc(v).replace(/\*\*/g,"")).join(" ");
    const raw=x.join(" ").trim().toLowerCase().replace(/\*\*/g,"");
-   const mainHeading=raw.startsWith("pravidlá") || raw.startsWith("pravidla");
+   if(raw === "pravidlá" || raw === "pravidla") return "";
    const heading=raw === "sezóna" || raw === "sezona" || raw === "playoff:" || raw.startsWith("tabuľka vzájomných zápasov:") || raw.startsWith("tabulka vzajomnych zapasov:") || raw.startsWith("tipovanie všetkých vzájomných zápasov") || raw.startsWith("tipovanie vsetkych vzajomnych zapasov");
-   return `<p class="${mainHeading?'rule-main':(heading?'rule-heading':'')}">${text}</p>`;
+   return `<p class="${heading?'rule-heading':''}">${text}</p>`;
   }).join("");
  }catch(e){el.innerHTML=`<div class="error">Nepodarilo sa načítať pravidlá: ${esc(e.message)}</div>`}
 }
