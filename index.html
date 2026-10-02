@@ -97,11 +97,11 @@ footer{text-align:center;color:#8190a5;padding:28px}
 
 /* Jednoduchá tabuľka vzájomných zápasov – číta presne A4:D zo Sheets */
 .head-simple-table{table-layout:auto;width:max-content;min-width:100%}
-.head-simple-table .rank-head{width:70px;min-width:70px;padding-left:4px!important;padding-right:4px!important;text-align:center!important}
+.head-simple-table .rank-head{width:70px;min-width:70px;max-width:70px;padding-left:4px!important;padding-right:4px!important;text-align:center!important}
 .head-simple-table .logo-head{width:105px;text-align:center!important}
 .head-simple-table .team-head,.head-simple-table .sheet-head{text-align:center!important;min-width:68px}
 .head-simple-table .value-head{width:70px;text-align:center!important}
-.head-simple-table .rank-cell{width:70px;min-width:70px;padding-left:4px!important;padding-right:4px!important;text-align:center;font-weight:700}
+.head-simple-table .rank-cell{width:70px;min-width:70px;max-width:70px;padding-left:4px!important;padding-right:4px!important;text-align:center;font-weight:700}
 .head-simple-table .logo-cell{width:105px;text-align:center}
 .head-simple-table .logo-cell .team-logo{width:42px;height:42px;margin:auto;object-fit:contain}
 .head-simple-table .team-name-cell{text-align:left;font-weight:700;white-space:normal}
@@ -134,6 +134,26 @@ footer{text-align:center;color:#8190a5;padding:28px}
  footer{padding:16px 8px;font-size:11px}
 }
 </style>
+
+<style id="rank-column-final-fix">
+.head-simple-table th.rank-head,
+.head-simple-table td.rank-cell {
+  width: 70px !important;
+  min-width: 70px !important;
+  max-width: 70px !important;
+  box-sizing: border-box !important;
+  text-align: center !important;
+}
+@media (max-width: 700px) {
+  .head-simple-table th.rank-head,
+  .head-simple-table td.rank-cell {
+    width: 70px !important;
+    min-width: 70px !important;
+    max-width: 70px !important;
+  }
+}
+</style>
+
 </head>
 <body>
 
