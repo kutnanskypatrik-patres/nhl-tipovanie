@@ -463,11 +463,18 @@ function teamShort(v){
 function parseGameDate(v){
  const s=clean(v);
  if(!s)return null;
+ const gm=s.match(/^Date\((\d{4}),(\d{1,2}),(\d{1,2})/);
+ if(gm)return new Date(Number(gm[1]),Number(gm[2]),Number(gm[3]));
  let d=new Date(s);
  if(!isNaN(d))return d;
  const m=s.match(/^(\d{1,2})[.\/-](\d{1,2})[.\/-](\d{4})$/);
  if(m)return new Date(Number(m[3]),Number(m[2])-1,Number(m[1]));
  return null;
+}
+function formatGameDate(v){
+ const d=v instanceof Date?v:parseGameDate(v);
+ if(!d || isNaN(d)) return clean(v);
+ return `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()}`;
 }
 function gameStatus(rawStatus, homeGoals, awayGoals, date){
  const s=normalizeHeader(rawStatus);
@@ -485,7 +492,7 @@ function renderGames(){
    const statusText=g.rawStatus || (g.status==='played'?'Odohrané':g.status==='live'?'Prebieha':'Nehrané');
    const statusClass=g.status==='played'?'played':g.status==='live'?'live':'unplayed';
    const score=(g.homeGoals!==''||g.awayGoals!=='')?`${esc(g.homeGoals)} : ${esc(g.awayGoals)}`:'- : -';
-   return `<tr><td class="date">${esc(g.date)}</td><td class="time">${esc(g.time)}</td><td><div class="game-team home"><span>${esc(teamShort(g.home))}</span>${logoHtml(g.home,'game-team-logo')}</div></td><td><div class="game-team away">${logoHtml(g.away,'game-team-logo')}<span>${esc(teamShort(g.away))}</span></div></td><td class="game-score">${score}</td><td><span class="game-status ${statusClass}">${esc(statusText)}</span></td></tr>`;
+   return `<tr><td class="date">${esc(formatGameDate(g.dateObj||g.date))}</td><td class="time">${esc(g.time)}</td><td><div class="game-team home"><span>${esc(teamShort(g.home))}</span>${logoHtml(g.home,'game-team-logo')}</div></td><td><div class="game-team away">${logoHtml(g.away,'game-team-logo')}<span>${esc(teamShort(g.away))}</span></div></td><td class="game-score">${score}</td><td><span class="game-status ${statusClass}">${esc(statusText)}</span></td></tr>`;
  }).join('')}</tbody></table></div>`;
 }
 
