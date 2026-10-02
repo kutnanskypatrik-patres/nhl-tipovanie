@@ -76,28 +76,6 @@ footer{text-align:center;color:#8190a5;padding:28px}
 .matrix-empty{color:#aab3bf}
 .matrix-score{font-size:15px}
 
-/* Jednoduchá mobilná tabuľka Vzájomné zápasy: Tím | Logo | Tím | Z */
-.simple-h2h{width:100%;min-width:0;table-layout:fixed}
-.simple-h2h th,.simple-h2h td{white-space:nowrap}
-.simple-h2h .simple-rank{width:28%;text-align:left}
-.simple-h2h .simple-logo-head{width:16%;text-align:center}
-.simple-h2h .simple-team-head{width:42%;text-align:left}
-.simple-h2h .simple-points-head{width:14%;text-align:center}
-.simple-h2h tbody td{height:62px;padding:6px 10px}
-.simple-h2h .simple-logo{text-align:center}
-.simple-h2h .simple-team{text-align:left;font-size:16px;font-weight:700;color:#728096}
-.simple-h2h .simple-points{text-align:center;font-size:16px;font-weight:800;color:#728096}
-.h2h-logo{width:42px;height:42px;object-fit:contain;display:inline-block;vertical-align:middle}
-@media(max-width:600px){
- .simple-h2h .simple-rank{width:22%;}
- .simple-h2h .simple-logo-head{width:18%;}
- .simple-h2h .simple-team-head{width:46%;}
- .simple-h2h .simple-points-head{width:14%;}
- .simple-h2h tbody td{height:56px;padding:5px 7px}
- .simple-h2h .simple-team{font-size:14px}
- .h2h-logo{width:38px;height:38px}
-}
-
 .scoring-note{
   margin-top:16px;
   text-align:left;
@@ -303,73 +281,39 @@ async function loadHeadToHead(){
   const looksGeneric=head.every((v,i)=>!v||v===String.fromCharCode(65+i));
   if(looksGeneric && data.length){head=data.shift()}
 
-  /*
-    Google Sheets má momentálne pre túto záložku jednoduchú 4-stĺpcovú tabuľku:
-    Tím | Logo | Tím | Z
-    V druhom stĺpci je v Sheets len pomlčka. Logo preto NESMIEME čítať z bunky
-    "Logo", ale musíme ho určiť podľa názvu tímu v treťom stĺpci.
-  */
-  const simpleHead = head.slice(0,4).map(clean);
-  const isSimpleHead = simpleHead.length >= 4
-    && simpleHead[0].toLowerCase()==="tím"
-    && simpleHead[1].toLowerCase()==="logo"
-    && simpleHead[2].toLowerCase()==="tím";
+  const width=Math.min(
+    12,
+    Math.max(head.length,...data.map(x=>x.length))
+  );
 
-  let html;
+  let html=`<div class="matrix-wrap"><table class="matrix-table"><thead><tr>`;
 
-  if(isSimpleHead){
-    html=`<div class="matrix-wrap"><table class="matrix-table simple-h2h"><thead><tr>
-      <th class="simple-rank">Tím</th><th class="simple-logo-head">Logo</th><th class="simple-team-head">Tím</th><th class="simple-points-head">Z</th>
-    </tr></thead><tbody>`;
-
-    data.forEach((row)=>{
-      const rank=clean(row[0]||"");
-      const team=clean(row[2]||"");
-      const points=clean(row[3]||"");
-      const src=logoFor(team);
-      const logo=src
-        ? `<img class="h2h-logo" src="${src}" alt="${esc(team)}" loading="eager" onerror="this.onerror=null;this.src='./logos/'+((${JSON.stringify(TEAM_LOGO_ALIASES)}[${JSON.stringify(team)}]||'')).replace(/^.*\//,'')">`
-        : `<span class="matrix-empty">—</span>`;
-      html+=`<tr>
-        <td class="simple-rank">${esc(rank)}</td>
-        <td class="simple-logo">${logo}</td>
-        <td class="simple-team"><span>${esc(team)}</span></td>
-        <td class="simple-points">${esc(points)}</td>
-      </tr>`;
-    });
-
-    html+=`</tbody></table></div>`;
-  } else {
-    const width=Math.min(12,Math.max(head.length,...data.map(x=>x.length)));
-    html=`<div class="matrix-wrap"><table class="matrix-table"><thead><tr>`;
-
-    for(let c=0;c<width;c++){
-      const v=clean(head[c]||"");
-      if(c===0){
-        html+=`<th>Tím</th>`;
-      }else{
-        html+=`<th><div class="matrix-header-team">${logoHtml(v)}<span>${esc(clean(v))}</span></div></th>`;
-      }
-    }
-
-    html+=`</tr></thead><tbody>`;
-
-    data.forEach((row)=>{
-      const team=clean(row[0]||"");
-      html+=`<tr><td><div class="matrix-team">${logoHtml(team)}<span>${esc(clean(team))}</span></div></td>`;
-      for(let c=1;c<width;c++){
-        const value=row[c]??"";
-        const headerTeam=clean(head[c]||"");
-        const diag=team && headerTeam && team===headerTeam;
-        let cls="matrix-cell"+(diag?" diag":"");
-        let display=value===""?"—":esc(value);
-        html+=`<td class="${cls}">${display}</td>`;
-      }
-      html+=`</tr>`;
-    });
-
-    html+=`</tbody></table></div>`;
+  for(let c=0;c<width;c++){
+   const v=clean(head[c]||"");
+   if(c===0){
+    html+=`<th>Tím</th>`;
+   }else{
+    html+=`<th><div class="matrix-header-team">${logoHtml(v)}<span>${esc(clean(v))}</span></div></th>`;
+   }
   }
+
+  html+=`</tr></thead><tbody>`;
+
+  data.forEach((row,ri)=>{
+   const team=clean(row[0]||"");
+   html+=`<tr><td><div class="matrix-team">${logoHtml(team)}<span>${esc(clean(team))}</span></div></td>`;
+   for(let c=1;c<width;c++){
+    const value=row[c]??"";
+    const headerTeam=clean(head[c]||"");
+    const diag=team && headerTeam && team===headerTeam;
+    let cls="matrix-cell"+(diag?" diag":"");
+    let display=value===""?"—":esc(value);
+    html+=`<td class="${cls}">${display}</td>`;
+   }
+   html+=`</tr>`;
+  });
+
+  html+=`</tbody></table></div>
     <div class="scoring-note">
       <div class="scoring-title">Bodovanie:</div>
       <div>Výhra v riadnom hracom čase (V) – <strong>2b</strong></div>
