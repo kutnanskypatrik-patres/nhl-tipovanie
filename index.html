@@ -29,6 +29,8 @@ main{max-width:1250px;margin:28px auto;padding:0 18px}
 .error{padding:14px;border-radius:10px;background:#fff1f1;color:#9b2020}
 #rulesContent{color:#000;text-align:left}
 #rulesContent p{color:#000;text-align:left;margin:0 0 8px 0}
+#rulesContent p.rule-heading{font-weight:800;font-size:18px;color:#0b1628;background:#eef3f8;border-left:5px solid #1769b5;padding:9px 12px;border-radius:7px;margin:14px 0 9px}
+@media(max-width:650px){#rulesContent p.rule-heading{font-size:15px;padding:8px 10px;margin:12px 0 8px}}
 .hidden{display:none}
 footer{text-align:center;color:#8190a5;padding:10px 8px;font-size:12px}
 
@@ -558,7 +560,12 @@ async function loadRules(){
  const el=document.getElementById("rulesContent");
  try{
   const t=await getSheet(SHEETS.rules),r=rows(t);
-  el.innerHTML=r.filter(x=>x.some(Boolean)).map(x=>`<p>${x.map(esc).join(" ")}</p>`).join("");
+  el.innerHTML=r.filter(x=>x.some(Boolean)).map(x=>{
+   const text=x.map(esc).join(" ");
+   const raw=x.join(" ").trim().toLowerCase();
+   const heading=raw.includes("pravidl") || raw.includes("playoff") || raw.includes("tabuľka vzájomných zápasov") || raw.includes("tabulka vzajomnych zapasov") || raw.includes("tipovanie všetkých vzájomných zápasov") || raw.includes("tipovanie vsetkych vzajomnych zapasov");
+   return `<p class="${heading?'rule-heading':''}">${text}</p>`;
+  }).join("");
  }catch(e){el.innerHTML=`<div class="error">Nepodarilo sa načítať pravidlá: ${esc(e.message)}</div>`}
 }
 
