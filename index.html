@@ -278,101 +278,73 @@ async function loadStandings(){
   Ostatné bunky zostanú presne podľa Google Sheets.
 */
 async function loadHeadToHead(){
-  const el=document.getElementById("headContent");
-  try{
-    /*
-      Načítame celý hárok Google Sheets bez pevného rozsahu.
-      Z neho potom vyberieme iba údaje pre zobrazenú tabuľku:
-      # | Logo | Tím | Z
+ const el=document.getElementById("headContent");
+ try{
+  const t=await getSheet(SHEETS.head),h=headers(t),allRows=rows(t);
+  // Zo samotnej tabuľky odstránime riadky Bodovanie/V/ P/VP/PP,
+  // pretože bodovanie zobrazujeme samostatne pod tabuľkou.
+  const r=allRows.filter(x=>{
+    if(!x.some(Boolean)) return false;
+    const text=x.map(v=>clean(v)).join(" ").toLowerCase();
+    return !text.includes("bodovanie:")
+      && !text.includes("výhra v riadnom hracom čase")
+      && !text.includes("prehra v riadnom hracom čase")
+      && !text.includes("výhra po predĺžení")
+      && !text.includes("prehra po predĺžení");
+  });
+  if(!r.length){el.innerHTML="<div class='error'>Tabuľka vzájomných zápasov je v Google Sheets prázdna.</div>";return}
 
-      Toto je zámerne odolnejšie voči zmenám v Google Sheets.
-      Ak sa pridajú ďalšie stĺpce, načítanie tabuľky sa nerozbije.
-    */
-    const t=await getSheet(SHEETS.head);
-    const allRows=rows(t);
+  let head=h.slice();
+  let data=r.slice();
 
-    const knownTeams=[
-      "Pittsburgh Penguins","Boston Bruins","New York Rangers",
-      "New York Islanders","Colorado Avalanche","Montréal Canadiens",
-      "Montreal Canadiens","Buffalo Sabres","Edmonton Oilers",
-      "Chicago Blackhawks","Tampa Bay Lightning","Philadelphia Flyers"
-    ];
+  // Ak Google Sheets vracia prvý riadok ako dáta a hlavičky sú len A/B/C..., použijeme ho ako hlavičku.
+  const looksGeneric=head.every((v,i)=>!v||v===String.fromCharCode(65+i));
+  if(looksGeneric && data.length){head=data.shift()}
 
-    const isTeam=v=>{
-      const s=clean(v).toLowerCase();
-      return knownTeams.some(n=>n.toLowerCase()===s) || !!logoFor(v);
-    };
+  const width=Math.min(
+    12,
+    Math.max(head.length,...data.map(x=>x.length))
+  );
 
-    /*
-      Nájdeme stĺpec s názvami tímov podľa skutočných údajov.
-      Pri aktuálnom Sheete je to stĺpec C.
-    */
-    let teamCol=-1;
-    outer:
-    for(const row of allRows){
-      for(let c=0;c<row.length;c++){
-        if(isTeam(row[c])){
-          teamCol=c;
-          break outer;
-        }
-      }
-    }
+  let html=`<div class="matrix-wrap"><table class="matrix-table"><thead><tr>`;
 
-    if(teamCol<0){
-      throw new Error("V Google Sheets sa nepodarilo nájsť stĺpec s názvami tímov.");
-    }
-
-    const rankCol=Math.max(0,teamCol-2);
-    const valueCol=teamCol+1;
-
-    const data=allRows.map((row,i)=>({
-      sourceIndex:i,
-      rank:clean(row[rankCol]??""),
-      team:clean(row[teamCol]??""),
-      value:clean(row[valueCol]??"")
-    })).filter(x=>{
-      if(!x.team || !isTeam(x.team)) return false;
-      return !x.team.toLowerCase().includes("bodovanie");
-    });
-
-    if(!data.length){
-      el.innerHTML="<div class='error'>Tabuľka vzájomných zápasov je v Google Sheets prázdna.</div>";
-      return;
-    }
-
-    let html=`<div class="matrix-wrap"><table class="matrix-table head-simple-table">
-      <thead><tr>
-        <th class="rank-head">#</th>
-        <th class="logo-head">Logo</th>
-        <th class="team-head">Tím</th>
-        <th class="value-head">Z</th>
-      </tr></thead><tbody>`;
-
-    data.forEach((x,i)=>{
-      const rank=Number(String(x.rank).replace(",", "."))||i+1;
-      const display=x.value===""?"—":esc(x.value);
-      html+=`<tr>
-        <td class="rank-cell">${rank}</td>
-        <td class="logo-cell">${logoHtml(x.team,"team-logo")}</td>
-        <td class="team-name-cell">${esc(x.team)}</td>
-        <td class="value-cell">${display}</td>
-      </tr>`;
-    });
-
-    html+=`</tbody></table></div>
-      <div class="scoring-note">
-        <div class="scoring-title">Bodovanie:</div>
-        <div>Výhra v riadnom hracom čase (V) – <strong>2b</strong></div>
-        <div>Prehra v riadnom hracom čase (P) – <strong>0b</strong></div>
-        <div>Výhra po predĺžení (VP) – <strong>2b</strong></div>
-        <div>Prehra po predĺžení (PP) – <strong>1b</strong></div>
-      </div>`;
-
-    el.innerHTML=html;
-  }catch(e){
-    el.innerHTML=`<div class="error">Nepodarilo sa načítať Google Sheets: ${esc(e.message)}</div>`;
+  for(let c=0;c<width;c++){
+   const v=clean(head[c]||"");
+   if(c===0){
+    html+=`<th>Tím</th>`;
+   }else{
+    html+=`<th><div class="matrix-header-team">${logoHtml(v)}<span>${esc(clean(v))}</span></div></th>`;
+   }
   }
+
+  html+=`</tr></thead><tbody>`;
+
+  data.forEach((row,ri)=>{
+   const team=clean(row[0]||"");
+   html+=`<tr><td><div class="matrix-team">${logoHtml(team)}<span>${esc(clean(team))}</span></div></td>`;
+   for(let c=1;c<width;c++){
+    const value=row[c]??"";
+    const headerTeam=clean(head[c]||"");
+    const diag=team && headerTeam && team===headerTeam;
+    let cls="matrix-cell"+(diag?" diag":"");
+    let display=value===""?"—":esc(value);
+    html+=`<td class="${cls}">${display}</td>`;
+   }
+   html+=`</tr>`;
+  });
+
+  html+=`</tbody></table></div>
+    <div class="scoring-note">
+      <div class="scoring-title">Bodovanie:</div>
+      <div>Výhra v riadnom hracom čase (V) – <strong>2b</strong></div>
+      <div>Prehra v riadnom hracom čase (P) – <strong>0b</strong></div>
+      <div>Výhra po predĺžení (VP) – <strong>2b</strong></div>
+      <div>Prehra po predĺžení (PP) – <strong>1b</strong></div>
+    </div>`;
+  el.innerHTML=html;
+ }catch(e){el.innerHTML=`<div class="error">Nepodarilo sa načítať Google Sheets: ${esc(e.message)}</div>`}
 }
+
 async function loadGeneric(sheet,id){
  const el=document.getElementById(id);
  try{
